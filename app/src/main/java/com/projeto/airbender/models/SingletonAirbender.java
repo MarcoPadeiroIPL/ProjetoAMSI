@@ -4,6 +4,7 @@ import android.content.Context;
 import android.widget.Toast;
 
 import java.util.Base64;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -25,7 +26,9 @@ public class SingletonAirbender {
     private static SingletonAirbender instance = null;
     private static RequestQueue requestQueue = null;
 
-    private static final String URL = "http://10.0.2.2/plsi/airbender/backend/web/api/";
+    private static String SERVER = "192.168.45.129"; // test server
+    private static String LOCALHOST = "10.0.2.2"; // localhost
+    private static final String URL = "http://" + LOCALHOST + "/plsi/airbender/backend/web/api/";
     private static String TOKEN = null;
 
     private LoginListener loginListener;
@@ -49,32 +52,48 @@ public class SingletonAirbender {
         this.loginListener = loginListener;
     }
 
-    public void loginAPI(final Context context, String username, String password){
-        if(!JsonParser.isConnectionInternet(context)){
+    public void loginAPI(final Context context, String username, String password) {
+        if (!JsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
         } else {
             StringRequest req = new StringRequest(Request.Method.GET, URL + "login", new Response.Listener<String>() {
+                // Sucesso
                 @Override
                 public void onResponse(String response) {
-                    Toast.makeText(context, JsonParser.parserJsonLogin(response), Toast.LENGTH_LONG).show();
-                    loginListener.onAttemptLogin(JsonParser.parserJsonLogin(response));
-                }},
+                    loginListener.onAttemptLogin(JsonParser.parserJsonLogin(response).get("token"), Integer.parseInt(JsonParser.parserJsonLogin(response).get("id")), JsonParser.parserJsonLogin(response).get("role"));
+                }
+            },
+                    // erro
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+                            try {
+                                if (error.networkResponse.statusCode == 500) {
+                                    Toast.makeText(context, "Server error", Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                                if (error.networkResponse.statusCode == 403) {
+                                    Toast.makeText(context, "Wrong credentials", Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+                            } catch (Exception ex) {
+                                Toast.makeText(context, "Server not found", Toast.LENGTH_LONG).show();
+                            }
                         }
                     }
-            ){
+            ) {
+                // Parametros a serem enviados
                 @Override
                 public Map<String, String> getHeaders() {
-                    Map<String, String>  params = new HashMap<String, String>();
+                    Map<String, String> params = new HashMap<String, String>();
 
                     if (!(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)) {
                         return null;
                     }
                     byte[] base64 = Base64.getEncoder().encode((username + ':' + password).getBytes());
                     params.put("Authorization", "Basic " + new String(base64));
+                    params.put("User-Agent", "Mozilla/5.0");
 
                     return params;
                 }
@@ -85,15 +104,15 @@ public class SingletonAirbender {
     }
 
     //public void setLivrosListener(LivrosListener listener) {
-     //   this.listener = listener;
+    //   this.listener = listener;
     //}
 
     //public void setDetalhesListener(DetalhesListener detalhesListener) {
-     //   this.detalhesListener = detalhesListener;
+    //   this.detalhesListener = detalhesListener;
     //}
 
     //private void gerarDadosDinamicos(){
-     //   livros = new ArrayList<>();
+    //   livros = new ArrayList<>();
     //}
 
     /*public Livro getLivro(int id) {

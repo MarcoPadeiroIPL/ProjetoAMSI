@@ -4,27 +4,27 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import com.projeto.airbender.MainActivity;
 import com.projeto.airbender.R;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.models.SingletonAirbender;
 
 public class LoginActivity extends AppCompatActivity implements LoginListener {
 
-    private EditText username, password;
+    private EditText etUsername, etPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        username = findViewById(R.id.etUsername);
-        password = findViewById(R.id.etPassword);
+
+        etUsername = findViewById(R.id.etUsername);
+        etPassword = findViewById(R.id.etPassword);
+
+        SingletonAirbender.getInstance(getApplicationContext()).setLoginListener(this);
     }
 
     /*public boolean isUsernameValid() {
@@ -35,27 +35,30 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     }*/
 
     public void onClickLogin(View view) {
-        /*if(!isUsernameValid()){
-            username.setError("Invalid username");
+        String username = etUsername.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+        if(username.isEmpty()){
+            etUsername.setError("Invalid username");
             return;
         }
-        if(!isPasswordValid()){
-            password.setError("Invalid password");
+            if(password.isEmpty() || password.length() < 8){
+            etPassword.setError("Invalid password");
             return;
-        }*/
+        }
         // chamar o LoginAPI do singleton
-        SingletonAirbender.getInstance(getApplicationContext()).loginAPI(getApplicationContext(), username.getText().toString(), password.getText().toString());
+        SingletonAirbender.getInstance(getApplicationContext()).loginAPI(getApplicationContext(), username, password);
 
     }
 
     @Override
-    public void onAttemptLogin(String token) {
+    public void onAttemptLogin(String token, int id, String role) {
         // obs: Guardar no shared o token de login
-       // Intent intent = new Intent(this, MainActivity.class);
-       // startActivity(intent);
-       // finish();
-        //Toast.makeText(this, token, Toast.LENGTH_LONG).show();
-
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("token",token);
+        intent.putExtra("id",id);
+        intent.putExtra("role",role);
+        startActivity(intent);
+        finish();
 
     }
 }

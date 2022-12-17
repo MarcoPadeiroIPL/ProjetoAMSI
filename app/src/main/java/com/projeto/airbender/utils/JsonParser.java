@@ -9,6 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JsonParser {
 
@@ -51,20 +53,26 @@ public class JsonParser {
         return livroAux;
     }*/
 
-    public static String parserJsonLogin(String response) {
-        String token = null;
+    public static Map<String, String> parserJsonLogin(String response) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("token", null);
+        map.put("id", null);
+        map.put("role", null);
         try {
             JSONObject login = new JSONObject(response);
-            if(login.getInt("status") == 200)
-                token = login.getString("token");
-        }
-        catch (JSONException e) {
+            if (login.getInt("status") == 200) {
+                map.put("token", login.getString("token"));
+                map.put("id", String.valueOf(login.getInt("id")));
+                map.put("role", login.getString("role"));
+            }
+
+        } catch (JSONException e) {
             e.printStackTrace();
         }
-        return token;
+        return map;
     }
 
-    public static boolean isConnectionInternet(Context context){
+    public static boolean isConnectionInternet(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network ni = cm.getActiveNetwork();
         return ni != null && cm.getNetworkInfo(ni).isConnected();

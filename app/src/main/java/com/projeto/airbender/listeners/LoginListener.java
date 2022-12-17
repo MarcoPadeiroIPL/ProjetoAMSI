@@ -1,7 +1,5 @@
 package com.projeto.airbender.listeners;
 
-import java.util.ArrayList;
-
 public interface LoginListener {
-    void onAttemptLogin(String token);
+    void onAttemptLogin(String token, int id, String role);
 }
