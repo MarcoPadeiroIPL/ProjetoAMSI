@@ -28,7 +28,7 @@ public class SingletonAirbender {
 
     private static String SERVER = "192.168.45.129"; // test server
     private static String LOCALHOST = "10.0.2.2"; // localhost
-    private static final String URL = "http://" + LOCALHOST + "/plsi/airbender/backend/web/api/";
+    private static final String URL = "http://" + SERVER + "/plsi/airbender/backend/web/api/";
     private static String TOKEN = null;
 
     private LoginListener loginListener;

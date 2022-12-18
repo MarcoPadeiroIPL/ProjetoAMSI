@@ -2,8 +2,10 @@ package com.projeto.airbender.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -21,15 +23,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
 
         teste1 = findViewById(R.id.teste1);
         teste2 = findViewById(R.id.teste2);
         teste3 = findViewById(R.id.teste3);
 
-        SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
 
         teste1.setText(sharedInfoUser.getInt("ID", 0) + "");
         teste2.setText(sharedInfoUser.getString("TOKEN", null));
         teste3.setText(sharedInfoUser.getString("ROLE", null));
+    }
+
+    public void onClickLogout(View view) {
+        SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedInfoUser.edit();
+        editor.clear();
+        editor.apply();
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
