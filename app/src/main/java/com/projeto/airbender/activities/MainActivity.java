@@ -1,38 +1,58 @@
 package com.projeto.airbender.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.projeto.airbender.R;
-import com.projeto.airbender.models.SingletonAirbender;
-
-import org.w3c.dom.Text;
+import com.projeto.airbender.fragments.FlightFragment;
+import com.projeto.airbender.fragments.HomeFragment;
+import com.projeto.airbender.fragments.ProfileFragment;
+import com.projeto.airbender.fragments.TicketFragment;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView teste1, teste2, teste3;
-
+    BottomNavigationView bottomNav;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        replaceFragment(new HomeFragment());
+        bottomNav = findViewById(R.id.bottomNavigationView);
+
+        bottomNav.setOnItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.navHome:
+                    replaceFragment(new HomeFragment());
+                    break;
+                case R.id.navFlights:
+                    replaceFragment(new FlightFragment());
+                    break;
+                case R.id.navQRCode:
+                    replaceFragment(new TicketFragment());
+                    break;
+                case R.id.navProfile:
+                    replaceFragment(new ProfileFragment());
+                    break;
+            }
+            return true;
+        });
         SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
+    }
 
-        teste1 = findViewById(R.id.teste1);
-        teste2 = findViewById(R.id.teste2);
-        teste3 = findViewById(R.id.teste3);
-
-
-        teste1.setText(sharedInfoUser.getInt("ID", 0) + "");
-        teste2.setText(sharedInfoUser.getString("TOKEN", null));
-        teste3.setText(sharedInfoUser.getString("ROLE", null));
+    private void replaceFragment(Fragment newFragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.frameLayout, newFragment);
+        fragmentTransaction.commit();
     }
 
     public void onClickLogout(View view) {
@@ -45,4 +65,5 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
 }
