@@ -2,6 +2,7 @@ package com.projeto.airbender.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,10 +25,11 @@ public class MainActivity extends AppCompatActivity {
         teste1 = findViewById(R.id.teste1);
         teste2 = findViewById(R.id.teste2);
         teste3 = findViewById(R.id.teste3);
-        Bundle extras = getIntent().getExtras();
 
-        teste1.setText(extras.getInt("id") + "");
-        teste2.setText(extras.getString("token"));
-        teste3.setText(extras.getString("role"));
+        SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
+
+        teste1.setText(sharedInfoUser.getInt("ID", 0) + "");
+        teste2.setText(sharedInfoUser.getString("TOKEN", null));
+        teste3.setText(sharedInfoUser.getString("ROLE", null));
     }
 }

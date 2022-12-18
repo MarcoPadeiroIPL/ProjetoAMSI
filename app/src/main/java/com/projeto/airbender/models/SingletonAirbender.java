@@ -60,7 +60,7 @@ public class SingletonAirbender {
                 // Sucesso
                 @Override
                 public void onResponse(String response) {
-                    loginListener.onAttemptLogin(JsonParser.parserJsonLogin(response).get("token"), Integer.parseInt(JsonParser.parserJsonLogin(response).get("id")), JsonParser.parserJsonLogin(response).get("role"));
+                    loginListener.onLogin(JsonParser.parserJsonLogin(response));
                 }
             },
                     // erro

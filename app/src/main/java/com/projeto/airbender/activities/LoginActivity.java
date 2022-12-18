@@ -3,6 +3,7 @@ package com.projeto.airbender.activities;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -11,6 +12,8 @@ import com.projeto.airbender.R;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.models.SingletonAirbender;
 
+import java.util.Map;
+
 public class LoginActivity extends AppCompatActivity implements LoginListener {
 
     private EditText etUsername, etPassword;
@@ -18,6 +21,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        checkIfLoggedIn();
         setContentView(R.layout.activity_login);
 
 
@@ -26,13 +30,15 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
         SingletonAirbender.getInstance(getApplicationContext()).setLoginListener(this);
     }
+    public void checkIfLoggedIn() {
+        // save on shared prefenrences
+        SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
 
-    /*public boolean isUsernameValid() {
-        // TODO: Validar username com API
-    }*/
-    /*public boolean isPasswordValid() {
-        // TODO: Validar password com API
-    }*/
+        if (sharedInfoUser.contains("TOKEN")) 
+            redirectToMain();
+
+        return;
+    }
 
     public void onClickLogin(View view) {
         String username = etUsername.getText().toString().trim();
@@ -50,15 +56,32 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
     }
 
-    @Override
-    public void onAttemptLogin(String token, int id, String role) {
-        // obs: Guardar no shared o token de login
+    public void redirectToMain(){
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("token",token);
-        intent.putExtra("id",id);
-        intent.putExtra("role",role);
         startActivity(intent);
         finish();
+
+    }
+
+    @Override
+    public void onLogin(Map<String, String> map) {
+        int id = map.get("id") != null ? Integer.parseInt(map.get("id")) : null;
+        String role = map.get("role");
+        String token = map.get("token");
+
+
+        // save on shared prefenrences
+        SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedInfoUser.edit();
+        editor.putInt("ID", id);
+        editor.putString("ROLE", role);
+        editor.putString("TOKEN", token);
+        editor.apply();
+
+
+        redirectToMain();
+
 
     }
 }
