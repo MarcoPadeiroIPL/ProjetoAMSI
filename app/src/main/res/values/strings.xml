@@ -6,4 +6,9 @@
     <string name="btn_logout">Logout</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="btn_save">Save</string>
+    <string name="txt_ipaddress">IP Address</string>
+    <string name="txt_local_server">Local Server</string>
+    <string name="txt_remote_server">Remote Server</string>
+    <string name="txt_default_local_ip">10.0.2.2</string>
 </resources>

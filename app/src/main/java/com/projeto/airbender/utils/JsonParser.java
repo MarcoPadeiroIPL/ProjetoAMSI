@@ -56,16 +56,11 @@ public class JsonParser {
     public static Map<String, String> parserJsonLogin(String response) {
         Map<String, String> map = new HashMap<String, String>();
         map.put("token", null);
-        map.put("id", null);
         map.put("role", null);
         try {
             JSONObject login = new JSONObject(response);
-            if (login.getInt("status") == 200) {
-                map.put("token", login.getString("token"));
-                map.put("id", String.valueOf(login.getInt("id")));
-                map.put("role", login.getString("role"));
-            }
-
+            map.put("token", login.getString("token"));
+            map.put("role", login.getString("role"));
         } catch (JSONException e) {
             e.printStackTrace();
         }

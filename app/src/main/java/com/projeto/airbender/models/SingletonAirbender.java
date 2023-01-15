@@ -1,6 +1,7 @@
 package com.projeto.airbender.models;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import java.util.Base64;
@@ -26,10 +27,7 @@ public class SingletonAirbender {
     private static SingletonAirbender instance = null;
     private static RequestQueue requestQueue = null;
 
-    private static String SERVER = "192.168.45.129"; // test server
-    private static String LOCALHOST = "10.0.2.2"; // localhost
-    private static final String URL = "http://" + SERVER + "/plsi/airbender/backend/web/api/";
-    private static String TOKEN = null;
+    private static final String PATH = "/sis/airbender/backend/web/api/";
 
     private LoginListener loginListener;
     // private DetalhesListener detalhesListener;
@@ -48,6 +46,14 @@ public class SingletonAirbender {
         //livroBD = new LivroBDHelper(context);
     }
 
+    public String makeURL(String server, String params) {
+        return "http://" + server + PATH + params;
+    }
+    public String getServer(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("settings", 0);
+        return preferences.getString("SERVER", "");
+    }
+
     public void setLoginListener(LoginListener loginListener) {
         this.loginListener = loginListener;
     }
@@ -56,7 +62,7 @@ public class SingletonAirbender {
         if (!JsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
         } else {
-            StringRequest req = new StringRequest(Request.Method.GET, URL + "login", new Response.Listener<String>() {
+            StringRequest req = new StringRequest(Request.Method.GET,makeURL(getServer(context), "login"), new Response.Listener<String>() {
                 // Sucesso
                 @Override
                 public void onResponse(String response) {
@@ -88,12 +94,11 @@ public class SingletonAirbender {
                 public Map<String, String> getHeaders() {
                     Map<String, String> params = new HashMap<String, String>();
 
-                    if (!(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)) {
+                    if (!(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O))
                         return null;
-                    }
+
                     byte[] base64 = Base64.getEncoder().encode((username + ':' + password).getBytes());
                     params.put("Authorization", "Basic " + new String(base64));
-                    params.put("User-Agent", "Mozilla/5.0");
 
                     return params;
                 }
