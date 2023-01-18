@@ -1,6 +1,8 @@
 package com.projeto.airbender.fragments;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -10,6 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.projeto.airbender.R;
@@ -37,7 +42,9 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
         recyclerView = view.findViewById(R.id.recyclerView);
 
         SingletonAirbender.getInstance(getContext()).setBalanceReqListener(this);
+
         SingletonAirbender.getInstance(getContext()).getAllBalanceReqs(getContext());
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         recyclerView.setAdapter(new BalanceReqAdapter(new ArrayList<BalanceReq>()));
 
@@ -45,10 +52,29 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
         fabAddBalanceReq.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Dialog dialog = new Dialog(getActivity());
-                dialog.setContentView(R.layout.dialog_add_balance_req);
-                dialog.setTitle("Add an Expense");
+                final Dialog dialog = new Dialog(getContext());
+
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog.setCancelable(true);
+                dialog.setContentView(R.layout.dialog_ask_balance);
+
+                final EditText etAmount = dialog.findViewById(R.id.etAmount);
+                final Button btnOK = dialog.findViewById(R.id.btnOK);
+
+                btnOK.setOnClickListener((v) -> {
+
+                    if (etAmount.getText().toString().isEmpty()) {
+                        etAmount.setError("Amount is required");
+                        etAmount.requestFocus();
+                        return;
+                    }
+
+                    int amount = Integer.parseInt(etAmount.getText().toString());
+
+                    SingletonAirbender.getInstance(getContext()).addBalanceReq(amount, getContext());
+
+                    dialog.dismiss();
+                });
 
                 dialog.show();
             }

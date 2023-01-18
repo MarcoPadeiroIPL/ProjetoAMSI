@@ -2,6 +2,7 @@ package com.projeto.airbender.models;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.Base64;
@@ -11,18 +12,19 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.listeners.BalanceReqListener;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.utils.ContentValuesHelper;
 import com.projeto.airbender.utils.DBHelper;
 import com.projeto.airbender.utils.JsonParser;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -162,65 +164,76 @@ public class SingletonAirbender {
             livroBD.editarLivroDB(livro);
     }*/
 
-    public void addBalanceReqAPI(final int amount, final Context context) {
+    public void addBalanceReq(final int amount, final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
-            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
         } else {
-            StringRequest req = new StringRequest(Request.Method.POST, makeURL(getServer(context), "balance-req", getToken(context)), new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    dbHelper.insertDB("balanceReq", contentValuesHelper.getBalanceReq(JsonParser.parseBalanceReq(response)));
-                    if (balanceReqListener != null)
-                        balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
-                }
-            },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
-                        }
+            try {
+                JSONObject jsonBody = new JSONObject();
+                jsonBody.put("amount", amount);
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, makeURL(getServer(context), "balance-req", getToken(context)), jsonBody,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                System.out.println("ahh");
+                                getAllBalanceReqs(context);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Handle the error
+                        System.out.println("erro");
                     }
-            ) {
-                @Override
-                protected Map<String, String> getParams() {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("amount", amount + "");
-                    return params;
                 }
-            };
-            requestQueue.add(req);
+
+                ) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> headers = new HashMap<String, String>();
+                        headers.put("Content-Type", "application/json; charset=utf-8");
+                        return headers;
+                    }
+                };
+                requestQueue.add(jsonObjectRequest);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public void getAllBalanceReqs(final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
-            if (balanceReqListener != null) {
+
+            if (balanceReqListener != null)
                 balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
-            }
         } else {
-            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "balance-req", getToken(context)), null, new Response.Listener<JSONArray>() {
-                @Override
-                public void onResponse(JSONArray response) {
-                    balanceReqs = JsonParser.parseBalanceReqs(response);
-                    if(dbHelper.getAllBalanceReqDB().size() == 0) {
-                        for (BalanceReq balanceReq : balanceReqs) {
-                            dbHelper.insertDB("balanceReq", contentValuesHelper.getBalanceReq(balanceReq));
-                        }
-                    }
-                    if (balanceReqListener != null)
-                        balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
-                }
-            },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(context, error.getMessage() + "", Toast.LENGTH_LONG).show();
-                        }
-                    }
-            );
-            requestQueue.add(req);
+            requestBalanceReqsAPI(context);
         }
+    }
+
+    public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {
+        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "balance-req", getToken(context)), null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                balanceReqs = JsonParser.parseBalanceReqs(response);
+                dbHelper.deleteAllDB("balanceReq");
+                for (BalanceReq balanceReq : balanceReqs) {
+                    dbHelper.insertDB("balanceReq", contentValuesHelper.getBalanceReq(balanceReq));
+                }
+                if (balanceReqListener != null)
+                    balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(context, error.getMessage() + "", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+        requestQueue.add(req);
+        return balanceReqs;
     }
 
     /*public void removerLivroAPI(final Livro livro, final Context context){
