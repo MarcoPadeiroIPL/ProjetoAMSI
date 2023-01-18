@@ -56,7 +56,7 @@ public class LoginFragment extends Fragment {
                     etUsername.setError("Invalid username");
                     return;
                 }
-                if (password.isEmpty() || password.length() < 8) {
+                if (password.isEmpty() || password.length() < 6) {
                     etPassword.setError("Invalid password");
                     return;
                 }

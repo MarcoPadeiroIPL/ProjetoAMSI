@@ -11,4 +11,8 @@
     <string name="txt_local_server">Local Server</string>
     <string name="txt_remote_server">Remote Server</string>
     <string name="txt_default_local_ip">10.0.2.2</string>
+    <string name="txt_balance_requests">Balance Requests</string>
+    <string name="dialog_select_amount">Insert an amount!</string>
+    <string name="txt_create">Create</string>
+    <string name="txt_cancel">Cancel</string>
 </resources>

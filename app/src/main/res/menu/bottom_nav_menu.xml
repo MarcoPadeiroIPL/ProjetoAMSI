@@ -4,12 +4,12 @@
     <item android:title="Home"
         android:id="@+id/navHome"
         android:icon="@drawable/ic_baseline_home" />
-    <item android:title="Flights"
-        android:id="@+id/navFlights"
+    <item android:title="Tickets"
+        android:id="@+id/navTickets"
         android:icon="@drawable/ic_baseline_airplane_ticket"/>
-    <item android:title="QR Code"
-        android:id="@+id/navQRCode"
-        android:icon="@drawable/ic_baseline_qr_code_scanner"/>
+    <item android:title="Balance Requests"
+        android:id="@+id/navBalanceReq"
+        android:icon="@drawable/ic_baseline_attach_money"/>
     <item android:title="Profile"
         android:id="@+id/navProfile"
         android:icon="@drawable/ic_baseline_person"/>

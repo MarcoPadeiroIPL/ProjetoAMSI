@@ -12,7 +12,7 @@ import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.projeto.airbender.R;
-import com.projeto.airbender.fragments.FlightFragment;
+import com.projeto.airbender.fragments.BalanceReqFragment;
 import com.projeto.airbender.fragments.HomeFragment;
 import com.projeto.airbender.fragments.ProfileFragment;
 import com.projeto.airbender.fragments.TicketFragment;
@@ -33,11 +33,11 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navHome:
                     replaceFragment(new HomeFragment());
                     break;
-                case R.id.navFlights:
-                    replaceFragment(new FlightFragment());
-                    break;
-                case R.id.navQRCode:
+                case R.id.navTickets:
                     replaceFragment(new TicketFragment());
+                    break;
+                case R.id.navBalanceReq:
+                    replaceFragment(new BalanceReqFragment());
                     break;
                 case R.id.navProfile:
                     replaceFragment(new ProfileFragment());

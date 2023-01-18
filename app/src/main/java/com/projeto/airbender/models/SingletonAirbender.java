@@ -13,9 +13,15 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.projeto.airbender.listeners.BalanceReqListener;
 import com.projeto.airbender.listeners.LoginListener;
+import com.projeto.airbender.utils.ContentValuesHelper;
+import com.projeto.airbender.utils.DBHelper;
 import com.projeto.airbender.utils.JsonParser;
 
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
@@ -26,11 +32,16 @@ import java.util.Objects;
 public class SingletonAirbender {
     private static SingletonAirbender instance = null;
     private static RequestQueue requestQueue = null;
+    private DBHelper dbHelper;
+
+    private ArrayList<BalanceReq> balanceReqs;
 
     private static final String PATH = "/sis/airbender/backend/web/api/";
 
     private LoginListener loginListener;
-    // private DetalhesListener detalhesListener;
+    private BalanceReqListener balanceReqListener;
+
+    private ContentValuesHelper contentValuesHelper;
 
     public static synchronized SingletonAirbender getInstance(Context context) {
         if (instance == null) {
@@ -41,28 +52,46 @@ public class SingletonAirbender {
     }
 
     private SingletonAirbender(Context context) {
-        //gerarDadosDinamicos();
-        //livros = new ArrayList<>();
-        //livroBD = new LivroBDHelper(context);
+        dbHelper = new DBHelper(context);
+        contentValuesHelper = new ContentValuesHelper();
+        gerarDadosDinamicos();
     }
 
-    public String makeURL(String server, String params) {
-        return "http://" + server + PATH + params;
+    public String makeURL(String server, String params, String token) {
+        if (token == null)
+            return "http://" + server + PATH + params;
+        else
+            return "http://" + server + PATH + params + "?access-token=" + token;
     }
+
     public String getServer(Context context) {
         SharedPreferences preferences = context.getSharedPreferences("settings", 0);
         return preferences.getString("SERVER", "");
+    }
+
+    public String getToken(Context context) {
+        SharedPreferences user = context.getSharedPreferences("user_data", 0);
+        return user.getString("TOKEN", "");
+    }
+
+    public int getUserID(Context context) {
+        SharedPreferences user = context.getSharedPreferences("user_data", 0);
+        return user.getInt("ID", 0);
     }
 
     public void setLoginListener(LoginListener loginListener) {
         this.loginListener = loginListener;
     }
 
+    public void setBalanceReqListener(BalanceReqListener balanceReqListener) {
+        this.balanceReqListener = balanceReqListener;
+    }
+
     public void loginAPI(final Context context, String username, String password) {
         if (!JsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
         } else {
-            StringRequest req = new StringRequest(Request.Method.GET,makeURL(getServer(context), "login"), new Response.Listener<String>() {
+            StringRequest req = new StringRequest(Request.Method.GET, makeURL(getServer(context), "login", null), new Response.Listener<String>() {
                 // Sucesso
                 @Override
                 public void onResponse(String response) {
@@ -108,57 +137,54 @@ public class SingletonAirbender {
 
     }
 
-    //public void setLivrosListener(LivrosListener listener) {
-    //   this.listener = listener;
-    //}
+    private void gerarDadosDinamicos() {
+        balanceReqs = new ArrayList<BalanceReq>();
+    }
 
-    //public void setDetalhesListener(DetalhesListener detalhesListener) {
-    //   this.detalhesListener = detalhesListener;
-    //}
-
-    //private void gerarDadosDinamicos(){
-    //   livros = new ArrayList<>();
-    //}
-
-    /*public Livro getLivro(int id) {
-        for (Livro livro : livros) {
-            if (livro.getId() == id) {
-                return livro;
+    public BalanceReq getBalanceReq(int id) {
+        for (BalanceReq balanceReq : balanceReqs) {
+            if (balanceReq.getId() == id) {
+                return balanceReq;
             }
         }
         return null;
+    }
+
+    /*public void removerLivroBD(int id) {
+        Livro livroaux = getLivro(id);
+        if (livroaux != null)
+            livroBD.removerLivroBD(id);
+    }
+
+    public void editarLivroBD(Livro livro) {
+        Livro livroaux = getLivro(livro.getId());
+        if (livroaux != null)
+            livroBD.editarLivroDB(livro);
     }*/
 
-
-    /*public void adicionarLivroAPI(final Livro livro, final Context context){
-        if(!LivroJsonParser.isConnectionInternet(context)){
-            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
-        }
-        else {
-            StringRequest req = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
+    public void addBalanceReqAPI(final int amount, final Context context) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_SHORT).show();
+        } else {
+            StringRequest req = new StringRequest(Request.Method.POST, makeURL(getServer(context), "balance-req", getToken(context)), new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
-                    adicionarLivroBD(LivroJsonParser.parserJsonLivro(response));
-                    if (detalhesListener != null)
-                        detalhesListener.onRefreshDetalhes(MenuMainActivity.ADD);
-                }},
+                    dbHelper.insertDB("balanceReq", contentValuesHelper.getBalanceReq(JsonParser.parseBalanceReq(response)));
+                    if (balanceReqListener != null)
+                        balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
+                }
+            },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     }
-            ){
+            ) {
                 @Override
                 protected Map<String, String> getParams() {
                     Map<String, String> params = new HashMap<>();
-                    params.put("token", TOKEN);
-                    params.put("titulo", livro.getTitulo());
-                    params.put("autor", livro.getAutor());
-                    params.put("serie", livro.getSerie());
-                    params.put("ano", livro.getAno());
-                    params.put("capa", livro.getCapa());
-
+                    params.put("amount", amount + "");
                     return params;
                 }
             };
@@ -166,27 +192,30 @@ public class SingletonAirbender {
         }
     }
 
-    public void getAllLivrosAPI(final Context context){
-        if(!LivroJsonParser.isConnectionInternet(context)){
+    public void getAllBalanceReqs(final Context context) {
+        if (!JsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
-            if (listener != null) {
-                listener.onRefreshListaLivros(getLivrosBD());
+            if (balanceReqListener != null) {
+                balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
             }
-        }
-        else {
-            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, URL,null, new Response.Listener<JSONArray>() {
+        } else {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "balance-req", getToken(context)), null, new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray response) {
-                    livros = LivroJsonParser.parserJsonLivros(response);
-                    atualizarLivrosBD(livros);
-                    if (listener != null) {
-                        listener.onRefreshListaLivros(livros);
+                    balanceReqs = JsonParser.parseBalanceReqs(response);
+                    if(dbHelper.getAllBalanceReqDB().size() == 0) {
+                        for (BalanceReq balanceReq : balanceReqs) {
+                            dbHelper.insertDB("balanceReq", contentValuesHelper.getBalanceReq(balanceReq));
+                        }
                     }
-                }},
+                    if (balanceReqListener != null)
+                        balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
+                }
+            },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(context, error.getMessage()+ "", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, error.getMessage() + "", Toast.LENGTH_LONG).show();
                         }
                     }
             );
@@ -194,7 +223,7 @@ public class SingletonAirbender {
         }
     }
 
-    public void removerLivroAPI(final Livro livro, final Context context){
+    /*public void removerLivroAPI(final Livro livro, final Context context){
         if(!LivroJsonParser.isConnectionInternet(context)){
             Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
         }

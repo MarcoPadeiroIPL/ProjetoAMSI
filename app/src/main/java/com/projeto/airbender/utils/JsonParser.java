@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 
+import com.projeto.airbender.models.BalanceReq;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +67,42 @@ public class JsonParser {
             e.printStackTrace();
         }
         return map;
+    }
+
+    public static BalanceReq parseBalanceReq(String response) {
+        BalanceReq balanceReq = null;
+        try {
+            JSONObject json = new JSONObject(response);
+            int id = json.optInt("id");
+            double amount = json.optDouble("amount");
+            String requestDate = json.optString("requestDate");
+            String decisionDate = json.optString("decisionDate");
+            String status = json.optString("status");
+            int client_id = json.optInt("client_id");
+            balanceReq = new BalanceReq(id, amount, requestDate, decisionDate, status, client_id);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return balanceReq;
+    }
+
+    public static ArrayList<BalanceReq> parseBalanceReqs(JSONArray response) {
+        ArrayList<BalanceReq> balanceReqs = new ArrayList<BalanceReq>();
+        try {
+            for (int i = 0; i < response.length(); i++) {
+                JSONObject balanceReq = response.optJSONObject(i);
+                int id = balanceReq.optInt("id");
+                double amount = balanceReq.optDouble("amount");
+                String requestDate = balanceReq.optString("requestDate");
+                String decisionDate = balanceReq.optString("decisionDate");
+                String status = balanceReq.optString("status");
+                int client_id = balanceReq.optInt("client_id");
+                balanceReqs.add(new BalanceReq(id, amount, requestDate, decisionDate, status, client_id));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return balanceReqs;
     }
 
     public static boolean isConnectionInternet(Context context) {
