@@ -20,11 +20,11 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.listeners.BalanceReqListener;
 import com.projeto.airbender.listeners.LoginListener;
+import com.projeto.airbender.listeners.TicketListener;
 import com.projeto.airbender.utils.ContentValuesHelper;
 import com.projeto.airbender.utils.DBHelper;
 import com.projeto.airbender.utils.JsonParser;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -51,6 +51,7 @@ public class SingletonAirbender {
 
     private LoginListener loginListener;
     private BalanceReqListener balanceReqListener;
+    private TicketListener ticketListener;
 
     private ContentValuesHelper contentValuesHelper;
 
@@ -65,7 +66,6 @@ public class SingletonAirbender {
     private SingletonAirbender(Context context) {
         dbHelper = new DBHelper(context);
         contentValuesHelper = new ContentValuesHelper();
-        gerarDadosDinamicos();
     }
 
     public String makeURL(String server, String params, String token) {
@@ -96,6 +96,10 @@ public class SingletonAirbender {
 
     public void setBalanceReqListener(BalanceReqListener balanceReqListener) {
         this.balanceReqListener = balanceReqListener;
+    }
+
+    public void setTicketListener(TicketListener ticketListener) {
+        this.ticketListener = ticketListener;
     }
 
     public void loginAPI(final Context context, String username, String password) {
@@ -146,10 +150,6 @@ public class SingletonAirbender {
             requestQueue.add(req);
         }
 
-    }
-
-    private void gerarDadosDinamicos() {
-        balanceReqs = new ArrayList<BalanceReq>();
     }
 
     public BalanceReq getBalanceReq(int id) {
@@ -216,40 +216,21 @@ public class SingletonAirbender {
                 balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
         } else {
             requestBalanceReqsAPI(context);
-            try {
-                mqtt();
-            } catch (MqttException ex) {
-                System.out.println("Error" + ex.getMessage());
-            }
         }
     }
 
-    public void mqtt() throws MqttException {
-        //MqttAndroidClient mqttClient = new MqttAndroidClient(context, "tcp://");
+    public void getTickets(final Context context, int position) {
+        /*if(position == 1 || position == 2 && !JsonParser.isConnectionInternet(context)) {
+            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
+            return;
+        }*/
+        ArrayList<Ticket> ticketsIGuess = new ArrayList<Ticket>();
+        ticketsIGuess.add(new Ticket(1, "r", "surname", "gender", 12, 13, getUserID(context), 29, "A", 12, 0, 0, 0, 2, "Ahh"));
+        ticketsIGuess.add(new Ticket(1, "r", "surname", "gender", 12, 13, getUserID(context), 29, "A", 12, 0, 0, 0, 2, "Ahh"));
+        ticketsIGuess.add(new Ticket(1, "r", "surname", "gender", 12, 13, getUserID(context), 29, "A", 12, 0, 0, 0, 2, "Ahh"));
+        if (ticketListener != null)
+            ticketListener.onRefreshTicketList(ticketsIGuess);
 
-        String clientId = MqttClient.generateClientId();
-        MqttClient client = new MqttClient("tcp://10.0.2.2:1883", clientId, null);
-        client.setCallback(new MqttCallback() {
-            @Override
-            public void connectionLost(Throwable cause) {
-                System.out.println("Connection lost");
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                String messageBody = new String(message.getPayload());
-                System.out.println("Message arrived: " + messageBody);
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-                System.out.println("Delivery complete");
-            }
-        });
-
-        client.connect();
-
-        client.subscribe("config", 1);
     }
 
     public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {

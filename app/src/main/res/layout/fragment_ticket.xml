@@ -1,66 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.BalanceReqFragment">
+    android:orientation="vertical">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/tvToCheckIn"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginTop="24dp"
-            android:text="@string/txt_completed"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.062"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvToCheckIn"
-            android:layout_width="391dp"
-            android:layout_height="209dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toTopOf="@+id/tvToComplete"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvToCheckIn"
-            app:layout_constraintVertical_bias="0.058">
+</LinearLayout>
 
-        </androidx.recyclerview.widget.RecyclerView>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvToComplete"
-            android:layout_width="379dp"
-            android:layout_height="273dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/tvToComplete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="12dp"
-            android:text="@string/txt_toComplete"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/rvToComplete"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.068"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.997" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</FrameLayout>

@@ -19,4 +19,5 @@
     <string name="buy_a_ticket">Buy a ticket</string>
     <string name="txt_completed">Completed</string>
     <string name="txt_toComplete">To complete</string>
+    <string name="txt_tickets">Your tickets</string>
 </resources>

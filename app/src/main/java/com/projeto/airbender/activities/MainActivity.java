@@ -17,6 +17,12 @@ import com.projeto.airbender.fragments.HomeFragment;
 import com.projeto.airbender.fragments.ProfileFragment;
 import com.projeto.airbender.fragments.TicketFragment;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 public class MainActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNav;
@@ -24,6 +30,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        try{
+            mqtt();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
 
         replaceFragment(new HomeFragment());
         bottomNav = findViewById(R.id.bottomNavigationView);
@@ -46,6 +58,32 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
         SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
+    }
+
+    public void mqtt() throws MqttException {
+        String clientId = MqttClient.generateClientId();
+        MqttClient client = new MqttClient("tcp://10.0.2.2:1883", clientId, null);
+        client.setCallback(new MqttCallback() {
+            @Override
+            public void connectionLost(Throwable cause) {
+                System.out.println("Connection lost");
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage message) throws Exception {
+                String messageBody = new String(message.getPayload());
+                System.out.println("Message arrived: " + messageBody);
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {
+                System.out.println("Delivery complete");
+            }
+        });
+
+        client.connect();
+
+        client.subscribe("config", 1);
     }
 
     private void replaceFragment(Fragment newFragment) {

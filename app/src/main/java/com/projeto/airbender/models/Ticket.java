@@ -154,4 +154,14 @@ public class Ticket {
     public void setTariffType(String tariffType) {
         this.tariffType = tariffType;
     }
+
+    public String getAirportDeparture(){
+       return "Warsaw Chopin";
+    }
+    public String getAirportArrival(){
+        return "Lisbon";
+    }
+    public String getDate(){
+        return "Fri 22 Jul 21:15";
+    }
 }

@@ -83,16 +83,6 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
         return view;
     }
 
-    public ArrayList<String> getItemsList() {
-        ArrayList<String> items = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            items.add("Item " + i);
-        }
-
-        return items;
-    }
-
     @Override
     public void onRefreshBalanceReqList(ArrayList<BalanceReq> balanceReqs) {
         recyclerView.setAdapter(new BalanceReqAdapter(balanceReqs));
