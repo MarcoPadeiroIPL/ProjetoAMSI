@@ -16,4 +16,7 @@
     <string name="txt_create">Create</string>
     <string name="txt_cancel">Cancel</string>
     <string name="ok">Ok</string>
+    <string name="buy_a_ticket">Buy a ticket</string>
+    <string name="txt_completed">Completed</string>
+    <string name="txt_toComplete">To complete</string>
 </resources>

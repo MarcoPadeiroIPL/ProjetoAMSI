@@ -59,10 +59,20 @@ public class JsonParser {
         Map<String, String> map = new HashMap<String, String>();
         map.put("token", null);
         map.put("role", null);
+        map.put("fName", null);
+        map.put("surname", null);
+        map.put("nif", null);
+        map.put("phone", null);
+        map.put("balance", null);
         try {
             JSONObject login = new JSONObject(response);
             map.put("token", login.getString("token"));
             map.put("role", login.getString("role"));
+            map.put("fName", login.getString("fName"));
+            map.put("surname", login.getString("surname"));
+            map.put("nif", login.getString("nif"));
+            map.put("phone", login.getString("phone"));
+            map.put("balance", String.valueOf(login.getDouble("balance")));
         } catch (JSONException e) {
             e.printStackTrace();
         }

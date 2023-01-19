@@ -66,18 +66,18 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
     @Override
     public void onLogin(Map<String, String> map) {
-        String role = map.get("role");
-        String token = map.get("token");
-
-
         // save on shared prefenrences
         SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedInfoUser.edit();
-        editor.putString("ROLE", role);
-        editor.putString("TOKEN", token);
+        editor.putString("ROLE", map.get("role"));
+        editor.putString("TOKEN", map.get("token"));
+        editor.putString("FNAME", map.get("fName"));
+        editor.putString("SURNAME", map.get("surname"));
+        editor.putString("PHONE", map.get("phone"));
+        editor.putString("NIF", map.get("nif"));
+        editor.putFloat("BALANCE", Float.parseFloat(map.get("balance")));
         editor.apply();
-
 
         redirectToMain();
 

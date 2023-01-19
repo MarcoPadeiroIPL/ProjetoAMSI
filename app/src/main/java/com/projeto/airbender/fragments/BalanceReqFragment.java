@@ -43,10 +43,10 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
 
         SingletonAirbender.getInstance(getContext()).setBalanceReqListener(this);
 
+        recyclerView.setAdapter(new BalanceReqAdapter(new ArrayList<BalanceReq>()));
         SingletonAirbender.getInstance(getContext()).getAllBalanceReqs(getContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
-        recyclerView.setAdapter(new BalanceReqAdapter(new ArrayList<BalanceReq>()));
 
         fabAddBalanceReq = view.findViewById(R.id.fabAddBalanceReq);
         fabAddBalanceReq.setOnClickListener(new View.OnClickListener() {

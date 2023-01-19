@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.view.View;
 import android.widget.Toast;
 
+import java.security.Timestamp;
+import java.util.Arrays;
 import java.util.Base64;
 
 import com.android.volley.Request;
@@ -22,6 +24,13 @@ import com.projeto.airbender.utils.ContentValuesHelper;
 import com.projeto.airbender.utils.DBHelper;
 import com.projeto.airbender.utils.JsonParser;
 
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -175,14 +184,12 @@ public class SingletonAirbender {
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
-                                System.out.println("ahh");
                                 getAllBalanceReqs(context);
                             }
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // Handle the error
-                        System.out.println("erro");
                     }
                 }
 
@@ -204,12 +211,45 @@ public class SingletonAirbender {
     public void getAllBalanceReqs(final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
-
+            balanceReqs = dbHelper.getAllBalanceReqDB();
             if (balanceReqListener != null)
                 balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
         } else {
             requestBalanceReqsAPI(context);
+            try {
+                mqtt();
+            } catch (MqttException ex) {
+                System.out.println("Error" + ex.getMessage());
+            }
         }
+    }
+
+    public void mqtt() throws MqttException {
+        //MqttAndroidClient mqttClient = new MqttAndroidClient(context, "tcp://");
+
+        String clientId = MqttClient.generateClientId();
+        MqttClient client = new MqttClient("tcp://10.0.2.2:1883", clientId, null);
+        client.setCallback(new MqttCallback() {
+            @Override
+            public void connectionLost(Throwable cause) {
+                System.out.println("Connection lost");
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage message) throws Exception {
+                String messageBody = new String(message.getPayload());
+                System.out.println("Message arrived: " + messageBody);
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {
+                System.out.println("Delivery complete");
+            }
+        });
+
+        client.connect();
+
+        client.subscribe("config", 1);
     }
 
     public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {
