@@ -11,12 +11,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.projeto.airbender.R;
 import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.Ticket;
+import com.projeto.airbender.models.TicketInfo;
 
 import java.util.ArrayList;
 
 public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder> {
 
-    private ArrayList<Ticket> localDataSet;
+    private ArrayList<TicketInfo> localDataSet;
 
     /**
      * Provide a reference to the type of views that you are using
@@ -48,7 +49,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
 
     }
 
-    public TicketAdapter(ArrayList<Ticket> dataSet) {
+    public TicketAdapter(ArrayList<TicketInfo> dataSet) {
         localDataSet = dataSet;
     }
 
@@ -64,9 +65,9 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        viewHolder.getAirportDeparture().setText(localDataSet.get(position).getAirportDeparture());
-        viewHolder.getAirportArrival().setText(localDataSet.get(position).getAirportArrival());
-        viewHolder.getDate().setText(localDataSet.get(position).getDate());
+        viewHolder.getAirportDeparture().setText(localDataSet.get(position).getAirportDeparture().getCity());
+        viewHolder.getAirportArrival().setText(localDataSet.get(position).getAirportArrival().getCity());
+        viewHolder.getDate().setText(localDataSet.get(position).getFlight().getDepartureDate());
     }
 
     // Return the size of your dataset (invoked by the layout manager)

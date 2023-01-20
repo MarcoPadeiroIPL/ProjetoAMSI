@@ -18,6 +18,7 @@ import com.projeto.airbender.listeners.TicketListener;
 import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.SingletonAirbender;
 import com.projeto.airbender.models.Ticket;
+import com.projeto.airbender.models.TicketInfo;
 
 import java.util.ArrayList;
 
@@ -36,7 +37,7 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
 
         SingletonAirbender.getInstance(getContext()).setTicketListener(this);
 
-        recyclerView.setAdapter(new TicketAdapter(new ArrayList<Ticket>()));
+        recyclerView.setAdapter(new TicketAdapter(new ArrayList<TicketInfo>()));
 
         SingletonAirbender.getInstance(getContext()).getTickets(getContext(), getArguments().getInt(ARG_OBJECT));
 
@@ -50,7 +51,7 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
     }
 
     @Override
-    public void onRefreshTicketList(ArrayList<Ticket> tickets) {
+    public void onRefreshTicketList(ArrayList<TicketInfo> tickets) {
         recyclerView.setAdapter(new TicketAdapter(tickets));
     }
 }

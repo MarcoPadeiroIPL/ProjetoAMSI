@@ -34,7 +34,8 @@ public class ContentValuesHelper {
         ContentValues values = new ContentValues();
         values.put("id", airport.getId());
         values.put("country", airport.getCountry());
-        values.put("code", airport.getCity());
+        values.put("code", airport.getCode());
+        values.put("city", airport.getCity());
         values.put("search", airport.getSearch());
         values.put("status", airport.getStatus());
         return values;
@@ -66,8 +67,8 @@ public class ContentValuesHelper {
         values.put("departureDate", flight.getDepartureDate());
         values.put("duration", flight.getDuration());
         values.put("airplane_id", flight.getAirplane());
-        values.put("airportDeparture", flight.getAirportDeparture());
-        values.put("airportArrival", flight.getAirportArrival());
+        values.put("airportDeparture_id", flight.getAirportDeparture());
+        values.put("airportArrival_id", flight.getAirportArrival());
         values.put("status", flight.getStatus());
         return values;
     }

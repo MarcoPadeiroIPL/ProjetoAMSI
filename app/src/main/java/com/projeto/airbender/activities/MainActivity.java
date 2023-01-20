@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 import com.projeto.airbender.fragments.BalanceReqFragment;
 import com.projeto.airbender.fragments.HomeFragment;
@@ -23,6 +24,8 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.util.TimerTask;
+
 public class MainActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNav;
@@ -31,11 +34,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        try{
-            mqtt();
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        showSnackIfOffline();
 
         replaceFragment(new HomeFragment());
         bottomNav = findViewById(R.id.bottomNavigationView);
@@ -93,15 +92,30 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    public void onClickLogout(View view) {
-        SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedInfoUser.edit();
-        editor.clear();
-        editor.apply();
-
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivity(intent);
-        finish();
+    private void showSnackIfOffline(){
+        final boolean online = isOnline();
+        runOnUiThread(new TimerTask() { //must run on main thread to update UI (show Snackbar), can be used only in Activity (FragmentActivity, AppCompatActivity...)
+            @Override
+            public void run() {
+                if(!online)
+                    Snackbar.make(findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_LONG).show();
+                else{
+                /*
+                    Your code here if user is online
+                */
+                }
+            }
+        });
     }
 
+    private boolean isOnline(){
+        SharedPreferences sharedInfoUser = getSharedPreferences("settings", MODE_PRIVATE);
+        try {
+            return Runtime.getRuntime().exec("/system/bin/ping -c 1 " + sharedInfoUser.getString("SERVER", "10.0.2.2")).waitFor() == 0; //  "8.8.8.8" is the server to ping
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

@@ -46,6 +46,7 @@ public class SingletonAirbender {
     private DBHelper dbHelper;
 
     private ArrayList<BalanceReq> balanceReqs;
+    private ArrayList<TicketInfo> tickets;
 
     private static final String PATH = "/sis/airbender/backend/web/api/";
 
@@ -220,17 +221,66 @@ public class SingletonAirbender {
     }
 
     public void getTickets(final Context context, int position) {
-        /*if(position == 1 || position == 2 && !JsonParser.isConnectionInternet(context)) {
+        if((position == 1 || position == 2) && !JsonParser.isConnectionInternet(context)) {
             Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
             return;
-        }*/
-        ArrayList<Ticket> ticketsIGuess = new ArrayList<Ticket>();
-        ticketsIGuess.add(new Ticket(1, "r", "surname", "gender", 12, 13, getUserID(context), 29, "A", 12, 0, 0, 0, 2, "Ahh"));
-        ticketsIGuess.add(new Ticket(1, "r", "surname", "gender", 12, 13, getUserID(context), 29, "A", 12, 0, 0, 0, 2, "Ahh"));
-        ticketsIGuess.add(new Ticket(1, "r", "surname", "gender", 12, 13, getUserID(context), 29, "A", 12, 0, 0, 0, 2, "Ahh"));
-        if (ticketListener != null)
-            ticketListener.onRefreshTicketList(ticketsIGuess);
+        }
+        if(position == 0 && !JsonParser.isConnectionInternet(context)) {
+            if (ticketListener != null)
+                //ticketListener.onRefreshTicketList(dbHelper.getAllTicketsDB());
+            return;
+        }
+        requestTicketsAPI(context);
+    }
 
+    public boolean airportExists(Airport airport){
+        ArrayList<Airport> airports = dbHelper.getAllAirportsTicketsDB();
+        for(Airport a : airports){
+            if(a.getId() == airport.getId())
+                return true;
+        }
+        return false;
+    }
+
+    public boolean flightExists(Flight flight){
+        ArrayList<Flight> flights = dbHelper.getAllFlightsTicketsDB();
+        for(Flight f : flights){
+            if(f.getId() == flight.getId())
+                return true;
+        }
+        return false;
+    }
+
+    private ArrayList<TicketInfo> requestTicketsAPI(final Context context) {
+        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "tickets", getToken(context)), null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                tickets = JsonParser.parseTickets(response);
+                dbHelper.deleteAllDB("tickets");
+                dbHelper.deleteAllDB("flightsTickets");
+                dbHelper.deleteAllDB("airportsTickets");
+                for (TicketInfo ticket : tickets) {
+                    if(!airportExists(ticket.getAirportArrival()))
+                        dbHelper.insertDB("airportsTickets", contentValuesHelper.getAirport(ticket.getAirportArrival()));
+                    if(!airportExists(ticket.getAirportDeparture()))
+                        dbHelper.insertDB("airportsTickets", contentValuesHelper.getAirport(ticket.getAirportDeparture()));
+                    if(!flightExists(ticket.getFlight()))
+                        dbHelper.insertDB("flightsTickets", contentValuesHelper.getFlight(ticket.getFlight()));
+                    dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket()));
+                }
+                if (ticketListener != null)
+                    ticketListener.onRefreshTicketList(tickets);
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(context, error.getMessage() + "nigger", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+        requestQueue.add(req);
+        return tickets;
     }
 
     public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {

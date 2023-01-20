@@ -4,7 +4,11 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 
+import com.projeto.airbender.models.Airport;
 import com.projeto.airbender.models.BalanceReq;
+import com.projeto.airbender.models.Flight;
+import com.projeto.airbender.models.Ticket;
+import com.projeto.airbender.models.TicketInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,6 +98,72 @@ public class JsonParser {
             e.printStackTrace();
         }
         return balanceReq;
+    }
+
+    public static TicketInfo parseTicket(String response) {
+        Ticket ticket = null;
+        Flight flight = null;
+        Airport airportArrival = null;
+        Airport airportDeparture = null;
+        TicketInfo ticketInfo = null;
+        try {
+            JSONObject json = new JSONObject(response);
+            ticket = new Ticket(json.optInt("id"), json.optString("fName"), json.optString("surname"),
+                    json.optString("gender"), json.optInt("age"), json.optInt("checkedIn"), json.optInt("client_id"),
+                    json.optInt("flight_id"), json.optString("seatLinha"), json.optInt("seatCol"), json.optInt("luggage_1"),
+                    json.optInt("luggage_2"), json.optInt("receipt_id"), json.optInt("tariff_id"), json.optString("tariffType"));
+
+            JSONObject jsonFlight = json.getJSONObject("flight");
+            flight = new Flight(jsonFlight.optInt("id"), jsonFlight.optString("departureDate"), json.optString("duration"),
+                    jsonFlight.optInt("airplane_id"), jsonFlight.optInt("airportDeparture_id"), jsonFlight.optInt("airportArrival_id"), jsonFlight.optString("status"));
+
+            JSONObject jsonAirportArrival = jsonFlight.getJSONObject("airportArrival");
+            airportArrival = new Airport(jsonAirportArrival.optInt("id"), jsonAirportArrival.optString("country"), jsonAirportArrival.optString("code"),
+                    jsonAirportArrival.optString("city"), jsonAirportArrival.optInt("search"), jsonAirportArrival.optString("status"));
+
+            JSONObject jsonAirportDeparture = jsonFlight.getJSONObject("airportDeparture");
+            airportDeparture = new Airport(jsonAirportDeparture.optInt("id"), jsonAirportDeparture.optString("country"), jsonAirportDeparture.optString("code"),
+                    jsonAirportDeparture.optString("city"), jsonAirportDeparture.optInt("search"), jsonAirportDeparture.optString("status"));
+
+            ticketInfo = new TicketInfo(ticket, airportDeparture, airportArrival, flight);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return ticketInfo;
+    }
+
+    public static ArrayList<TicketInfo> parseTickets(JSONArray response) {
+        Ticket ticket = null;
+        Flight flight = null;
+        Airport airportArrival = null;
+        Airport airportDeparture = null;
+        ArrayList<TicketInfo> ticketsInfo = new ArrayList<TicketInfo>();
+        try {
+            for (int i = 0; i < response.length(); i++) {
+                JSONObject json = response.optJSONObject(i);
+                ticket = new Ticket(json.optInt("id"), json.optString("fName"), json.optString("surname"),
+                        json.optString("gender"), json.optInt("age"), json.optInt("checkedIn"), json.optInt("client_id"),
+                        json.optInt("flight_id"), json.optString("seatLinha"), json.optInt("seatCol"), json.optInt("luggage_1"),
+                        json.optInt("luggage_2"), json.optInt("receipt_id"), json.optInt("tariff_id"), json.optString("tariffType"));
+
+                JSONObject jsonFlight = json.getJSONObject("flight");
+                flight = new Flight(jsonFlight.optInt("id"), jsonFlight.optString("departureDate"), json.optString("duration"),
+                        jsonFlight.optInt("airplane_id"), jsonFlight.optInt("airportDeparture_id"), jsonFlight.optInt("airportArrival_id"), jsonFlight.optString("status"));
+
+                JSONObject jsonAirportArrival = jsonFlight.getJSONObject("airportArrival");
+                airportArrival = new Airport(jsonAirportArrival.optInt("id"), jsonAirportArrival.optString("country"), jsonAirportArrival.optString("code"),
+                        jsonAirportArrival.optString("city"), jsonAirportArrival.optInt("search"), jsonAirportArrival.optString("status"));
+
+                JSONObject jsonAirportDeparture = jsonFlight.getJSONObject("airportDeparture");
+                airportDeparture = new Airport(jsonAirportDeparture.optInt("id"), jsonAirportDeparture.optString("country"), jsonAirportDeparture.optString("code"),
+                        jsonAirportDeparture.optString("city"), jsonAirportDeparture.optInt("search"), jsonAirportDeparture.optString("status"));
+
+                ticketsInfo.add(new TicketInfo(ticket, airportDeparture, airportArrival, flight));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return ticketsInfo;
     }
 
     public static ArrayList<BalanceReq> parseBalanceReqs(JSONArray response) {

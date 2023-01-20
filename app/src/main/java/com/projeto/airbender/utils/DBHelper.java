@@ -7,7 +7,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.projeto.airbender.models.Airport;
 import com.projeto.airbender.models.BalanceReq;
+import com.projeto.airbender.models.Flight;
 import com.projeto.airbender.models.Ticket;
 
 import java.util.ArrayList;
@@ -25,11 +27,54 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        String airports = "CREATE TABLE airports ( " +
+                "id INTEGER PRIMARY KEY, " +
+                "country VARCHAR NOT NULL," +
+                "code VARCHAR NOT NULL, " +
+                "city VARCHAR NOT NULL, " +
+                "search INT NOT NULL, " +
+                "status VARCHAR NOT NULL " +
+                ");";
+        db.execSQL(airports);
+        String flights = "CREATE TABLE flights ( " +
+                "id INTEGER PRIMARY KEY, " +
+                "departureDate VARCHAR NOT NULL," +
+                "duration VARCHAR NOT NULL, " +
+                "airplane_id INTEGER NOT NULL, " +
+                "airportDeparture_id INTEGER NOT NULL, " +
+                "airportArrival_id INTEGER NOT NULL, " +
+                "status VARCHAR NOT NULL, " +
+                "FOREIGN KEY (airportDeparture_id) REFERENCES airports(id), " +
+                "FOREIGN KEY (airportArrival_id) REFERENCES airports(id) " +
+                ");";
+        db.execSQL(flights);
+        String airportsTickets = "CREATE TABLE airportsTickets ( " +
+                "id INTEGER PRIMARY KEY, " +
+                "country VARCHAR NOT NULL," +
+                "code VARCHAR NOT NULL, " +
+                "city VARCHAR NOT NULL, " +
+                "search INT NOT NULL, " +
+                "status VARCHAR NOT NULL " +
+                ");";
+        db.execSQL(airportsTickets);
+        String flightsTickets = "CREATE TABLE flightsTickets ( " +
+                "id INTEGER PRIMARY KEY, " +
+                "departureDate VARCHAR NOT NULL," +
+                "duration VARCHAR NOT NULL, " +
+                "airplane_id INTEGER NOT NULL, " +
+                "airportDeparture_id INTEGER NOT NULL, " +
+                "airportArrival_id INTEGER NOT NULL, " +
+                "status VARCHAR NOT NULL, " +
+                "FOREIGN KEY (airportDeparture_id) REFERENCES airportsTickets(id), " +
+                "FOREIGN KEY (airportArrival_id) REFERENCES airportsTickets(id) " +
+                ");";
+        db.execSQL(flightsTickets);
         String tickets = "CREATE TABLE tickets ( " +
                 "id INTEGER PRIMARY KEY, " +
                 "fName TEXT NOT NULL," +
                 "surname TEXT NOT NULL, " +
                 "age INTEGER NOT NULL, " +
+                "gender VARCHAR NOT NULL, " +
                 "checkedIn INTEGER, " +
                 "client_id INTEGER NOT NULL, " +
                 "flight_id INTEGER NOT NULL, " +
@@ -38,8 +83,30 @@ public class DBHelper extends SQLiteOpenHelper {
                 "luggage_1 INTEGER, " +
                 "luggage_2 INTEGER, " +
                 "receipt_id INTEGER NOT NULL, " +
-                "tariff_id INTEGER NOT NULL " +
+                "tariff_id INTEGER NOT NULL, " +
+                "tariffType VARCHAR NOT NULL, " +
+                "FOREIGN KEY (flight_id) REFERENCES flightsTickets(id) " +
                 ");";
+        db.execSQL(tickets);
+        String ticketsOffline = "CREATE TABLE ticketsOffline ( " +
+                "id INTEGER PRIMARY KEY, " +
+                "fName TEXT NOT NULL," +
+                "surname TEXT NOT NULL, " +
+                "age INTEGER NOT NULL, " +
+                "gender VARCHAR NOT NULL, " +
+                "checkedIn INTEGER, " +
+                "client_id INTEGER NOT NULL, " +
+                "flight_id INTEGER NOT NULL, " +
+                "seatLinha INTEGER NOT NULL, " +
+                "seatCol CHAR NOT NULL, " +
+                "luggage_1 INTEGER, " +
+                "luggage_2 INTEGER, " +
+                "receipt_id INTEGER NOT NULL, " +
+                "tariff_id INTEGER NOT NULL, " +
+                "tariffType VARCHAR NOT NULL, " +
+                "FOREIGN KEY (flight_id) REFERENCES flightsTickets(id) " +
+                ");";
+        db.execSQL(ticketsOffline);
         String balanceRequests = "CREATE TABLE balanceReq (" +
                 "id INTEGER PRIMARY KEY, "  +
                 "amount DOUBLE NOT NULL,"  +
@@ -52,9 +119,18 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        String flights= "DROP TABLE IF EXISTS flights;";
+        db.execSQL(flights);
+        String airports= "DROP TABLE IF EXISTS airports;";
+        db.execSQL(airports);
+        String flightsTickets = "DROP TABLE IF EXISTS flightsTickets;";
+        db.execSQL(flightsTickets);
+        String airportsTickets = "DROP TABLE IF EXISTS airportsTickets;";
+        db.execSQL(airportsTickets);
         String tickets = "DROP TABLE IF EXISTS tickets;";
+        db.execSQL(tickets);
         String balanceReq = "DROP TABLE IF EXISTS balanceReq;";
-        db.execSQL(tickets + balanceReq);
+        db.execSQL(balanceReq);
         this.onCreate(db);
     }
 
@@ -75,10 +151,69 @@ public class DBHelper extends SQLiteOpenHelper {
         db.delete(table, null, null);
     }
 
-    public void destroyDB() {
-        this.onCreate(db);
+    public ArrayList<Flight> getAllFlightsTicketsDB() {
+        ArrayList<Flight> flights = new ArrayList<Flight>();
+        Cursor cursor = db.query("flightsTickets", new String[]{
+                "id",
+                "departureDate",
+                "duration",
+                "airplane_id",
+                "airportDeparture_id",
+                "airportArrival_id",
+                "status"
+        }, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                Flight flight = new Flight(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(3), cursor.getInt(4), cursor.getString(5));
+                flights.add(flight);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+
+        return flights;
     }
 
+    public ArrayList<Airport> getAllAirportsDB() {
+        ArrayList<Airport> airports = new ArrayList<Airport>();
+        Cursor cursor = db.query("airportsTickets", new String[]{
+                "id",
+                "country",
+                "code",
+                "city",
+                "search",
+                "status"
+        }, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                Airport airport = new Airport(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getInt(3), cursor.getString(4));
+                airports.add(airport);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+
+        return airports;
+    }
+
+    public ArrayList<Airport> getAllAirportsTicketsDB() {
+        ArrayList<Airport> airports = new ArrayList<Airport>();
+        Cursor cursor = db.query("airportsTickets", new String[]{
+                "id",
+                "country",
+                "code",
+                "city",
+                "search",
+                "status"
+        }, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                Airport airport = new Airport(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getInt(3), cursor.getString(4));
+                airports.add(airport);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+
+        return airports;
+    }
     public ArrayList<Ticket> getAllTicketsDB() {
         ArrayList<Ticket> tickets = new ArrayList<Ticket>();
         Cursor cursor = db.query("tickets", new String[]{

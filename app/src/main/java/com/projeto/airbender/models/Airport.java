@@ -9,7 +9,8 @@ public class Airport {
     private String status;
 
 
-    public Airport(String country, String code, String city, int search, String status) {
+    public Airport(int id, String country, String code, String city, int search, String status) {
+        this.id = id;
         this.country = country;
         this.code = code;
         this.city = city;
