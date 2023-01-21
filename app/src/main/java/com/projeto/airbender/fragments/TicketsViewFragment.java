@@ -10,6 +10,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,7 +45,7 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
 
         SingletonAirbender.getInstance(getContext()).setTicketListener(this);
 
-        recyclerView.setAdapter(new TicketAdapter(new ArrayList<TicketInfo>()));
+        recyclerView.setAdapter(new TicketAdapter(new ArrayList<TicketInfo>(), this));
 
         SingletonAirbender.getInstance(getContext()).getTickets(getContext(), getArguments().getInt(ARG_OBJECT));
 
@@ -58,6 +60,18 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
 
     @Override
     public void onRefreshTicketList(ArrayList<TicketInfo> tickets) {
-        recyclerView.setAdapter(new TicketAdapter(tickets));
+        recyclerView.setAdapter(new TicketAdapter(tickets, this));
     }
+
+    @Override
+    public void onItemClicked(TicketInfo ticket) {
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.frameLayout, new TicketDetailFragment(ticket));
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+
+    }
+
+
 }

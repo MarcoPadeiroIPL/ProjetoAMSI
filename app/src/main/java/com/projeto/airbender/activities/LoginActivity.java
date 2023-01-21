@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
         setContentView(R.layout.activity_login);
 
-        replaceFragment(new LoginFragment());
+        replaceFragment(new LoginFragment(), false);
 
         SingletonAirbender.getInstance(getApplicationContext()).setLoginListener(this);
     }
@@ -43,25 +43,26 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         // save on shared prefenrences
         SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
 
-        if (sharedInfoUser.contains("TOKEN")) 
-            redirectToMain();
-
-        return;
+        if (sharedInfoUser.contains("TOKEN")) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
-    private void replaceFragment(Fragment newFragment) {
+    public void replaceFragment(Fragment newFragment, boolean keepBack) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frameLayout, newFragment);
+
+        if (keepBack)
+            fragmentTransaction.addToBackStack(null);
+
         fragmentTransaction.commit();
     }
 
-
-    public void redirectToMain(){
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        finish();
-
+    public void attemptLogin(String username, String password) {
+        SingletonAirbender.getInstance(getApplicationContext()).loginAPI(getApplicationContext(), username, password);
     }
 
     @Override
@@ -79,8 +80,9 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         editor.putFloat("BALANCE", Float.parseFloat(map.get("balance")));
         editor.apply();
 
-        redirectToMain();
-
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
 
     }
     public void defineServer(){

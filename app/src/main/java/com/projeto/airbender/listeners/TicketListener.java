@@ -8,4 +8,5 @@ import java.util.ArrayList;
 
 public interface TicketListener {
     void onRefreshTicketList(ArrayList<TicketInfo> tickets);
+    void onItemClicked(TicketInfo ticket);
 }

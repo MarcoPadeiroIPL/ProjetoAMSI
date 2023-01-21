@@ -20,4 +20,8 @@
     <string name="txt_completed">Completed</string>
     <string name="txt_toComplete">To complete</string>
     <string name="txt_tickets">Your tickets</string>
+    <string name="txt_check_in">Check-in</string>
+    <string name="passager_information">Passager Information</string>
+    <string name="flight_information">Flight Information</string>
+    <string name="ticket_information">Ticket Information</string>
 </resources>

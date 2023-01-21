@@ -24,6 +24,7 @@ public class LoginFragment extends Fragment {
     private EditText etUsername, etPassword;
     private FloatingActionButton fabSettings;
     private Button btnLogin;
+    private LoginActivity activity;
 
     public LoginFragment() {
         // Required empty public constructor
@@ -33,17 +34,19 @@ public class LoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_login, container, false);
+
         etUsername = view.findViewById(R.id.etUsername);
         etPassword = view.findViewById(R.id.etPassword);
         btnLogin = view.findViewById(R.id.btnLogin);
-
         fabSettings = view.findViewById(R.id.fabSettings);
+        activity = (LoginActivity) getActivity();
 
         fabSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Do something when the button is clicked
-                replaceFragment(new SettingsFragment());
+                LoginActivity activity = (LoginActivity) getActivity();
+                activity.replaceFragment(new SettingsFragment(), true);
             }
         });
 
@@ -60,19 +63,13 @@ public class LoginFragment extends Fragment {
                     etPassword.setError("Invalid password");
                     return;
                 }
-                // chamar o LoginAPI do singleton
-                SingletonAirbender.getInstance(getActivity().getApplicationContext()).loginAPI(getActivity().getApplicationContext(), username, password);
+
+                // chamar o método login da activity
+                activity.attemptLogin(username, password);
+
             }
         });
 
         return view;
-    }
-
-    private void replaceFragment(Fragment newFragment) {
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.frameLayout, newFragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
     }
 }

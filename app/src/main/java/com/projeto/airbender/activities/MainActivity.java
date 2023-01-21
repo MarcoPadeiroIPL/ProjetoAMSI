@@ -37,22 +37,22 @@ public class MainActivity extends AppCompatActivity {
 
         showSnackIfOffline();
 
-        replaceFragment(new HomeFragment());
+        replaceFragment(new HomeFragment(), false);
         bottomNav = findViewById(R.id.bottomNavigationView);
 
         bottomNav.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.navHome:
-                    replaceFragment(new HomeFragment());
+                    replaceFragment(new HomeFragment(), false);
                     break;
                 case R.id.navTickets:
-                    replaceFragment(new TicketFragment());
+                    replaceFragment(new TicketFragment(), false);
                     break;
                 case R.id.navBalanceReq:
-                    replaceFragment(new BalanceReqFragment());
+                    replaceFragment(new BalanceReqFragment(), false);
                     break;
                 case R.id.navProfile:
-                    replaceFragment(new ProfileFragment());
+                    replaceFragment(new ProfileFragment(), false);
                     break;
             }
             return true;
@@ -86,10 +86,14 @@ public class MainActivity extends AppCompatActivity {
         client.subscribe("config", 1);
     }
 
-    private void replaceFragment(Fragment newFragment) {
+    public void replaceFragment(Fragment newFragment, boolean keepBack) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frameLayout, newFragment);
+
+        if (keepBack)
+            fragmentTransaction.addToBackStack(null);
+
         fragmentTransaction.commit();
     }
 
@@ -113,4 +117,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
 }

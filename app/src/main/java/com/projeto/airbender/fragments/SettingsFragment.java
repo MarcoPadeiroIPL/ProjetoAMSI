@@ -12,10 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.projeto.airbender.R;
+import com.projeto.airbender.activities.LoginActivity;
 
 import java.io.Console;
 import java.util.Objects;
@@ -25,7 +27,8 @@ public class SettingsFragment extends Fragment {
 
     private RadioButton rbLocal, rbRemote;
     private EditText etLocal, etRemote;
-    private Button btnLogin;
+    private Button btnSave;
+    private ImageButton btnBack;
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -42,17 +45,26 @@ public class SettingsFragment extends Fragment {
         etLocal = view.findViewById(R.id.etLocal);
         etRemote = view.findViewById(R.id.etRemote);
 
-        btnLogin = view.findViewById(R.id.btnLogin);
+        btnSave = view.findViewById(R.id.btnSave);
+        btnBack = view.findViewById(R.id.btnBack);
 
         SharedPreferences preferences = getActivity().getSharedPreferences("settings", 0);
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().onBackPressed();
+            }
+        });
+        btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Do something when the button is clicked
                 if(rbLocal.isChecked())
-                    preferences.edit().putString("SERVER", etLocal.getText().toString()).apply();
+                    System.out.println("Local");
+                    // preferences.edit().putString("SERVER", etLocal.getText().toString()).apply();
                 else if(rbRemote.isChecked()) {
+                    System.out.println("Remote");
                     String ip = etRemote.getText().toString().trim();
                     if(Pattern.matches("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",ip))
                         preferences.edit().putString("SERVER", ip).apply();
@@ -61,8 +73,8 @@ public class SettingsFragment extends Fragment {
                     }
                 }
                 Toast.makeText(getActivity(), "Settings saved", Toast.LENGTH_SHORT).show();
-                replaceFragment(new LoginFragment());
 
+                ((LoginActivity)getActivity()).replaceFragment(new LoginFragment(), false);
             }
         });
 
@@ -79,12 +91,4 @@ public class SettingsFragment extends Fragment {
         }
         return view;
     }
-
-    private void replaceFragment(Fragment newFragment) {
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.frameLayout, newFragment);
-        fragmentTransaction.commit();
-    }
-
 }

@@ -6,9 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.projeto.airbender.R;
+import com.projeto.airbender.listeners.TicketDetailListener;
+import com.projeto.airbender.listeners.TicketListener;
 import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.Ticket;
 import com.projeto.airbender.models.TicketInfo;
@@ -18,38 +21,12 @@ import java.util.ArrayList;
 public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder> {
 
     private ArrayList<TicketInfo> localDataSet;
-    /**
-     * Provide a reference to the type of views that you are using
-     * (custom ViewHolder)
-     */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView airportDeparture, airportArrival, date;
+    private TicketListener ticketListener;
 
-        public ViewHolder(View view) {
-            super(view);
-            // Define click listener for the ViewHolder's View
 
-            airportDeparture = (TextView) view.findViewById(R.id.tvAirportDeparture);
-            airportArrival = (TextView) view.findViewById(R.id.tvAirportArrival);
-            date = (TextView) view.findViewById(R.id.tvDate);
-        }
-
-        public TextView getAirportDeparture() {
-            return airportDeparture;
-        }
-
-        public TextView getAirportArrival() {
-            return airportArrival;
-        }
-
-        public TextView getDate() {
-            return date;
-        }
-
-    }
-
-    public TicketAdapter(ArrayList<TicketInfo> dataSet) {
+    public TicketAdapter(ArrayList<TicketInfo> dataSet, TicketListener ticketListener) {
         localDataSet = dataSet;
+        this.ticketListener = ticketListener;
     }
 
     @Override
@@ -67,12 +44,50 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
         viewHolder.getAirportDeparture().setText(localDataSet.get(position).getAirportDeparture().getCity());
         viewHolder.getAirportArrival().setText(localDataSet.get(position).getAirportArrival().getCity());
         viewHolder.getDate().setText(localDataSet.get(position).getFlight().getDepartureDate());
+        viewHolder.getCard().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ticketListener.onItemClicked(localDataSet.get(position));
+            }
+        });
+
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return localDataSet.size();
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        private final TextView airportDeparture, airportArrival, date;
+        public CardView cardView;
+
+        public ViewHolder(View view) {
+            super(view);
+            // Define click listener for the ViewHolder's View
+
+            airportDeparture = (TextView) view.findViewById(R.id.tvAirportDeparture);
+            airportArrival = (TextView) view.findViewById(R.id.tvAirportArrival);
+            date = (TextView) view.findViewById(R.id.tvDate);
+            cardView = (CardView) view.findViewById(R.id.card_view);
+        }
+
+        public TextView getAirportDeparture() {
+            return airportDeparture;
+        }
+
+        public TextView getAirportArrival() {
+            return airportArrival;
+        }
+
+        public TextView getDate() {
+            return date;
+        }
+
+        public CardView getCard() {
+            return cardView;
+        }
     }
 }
 
