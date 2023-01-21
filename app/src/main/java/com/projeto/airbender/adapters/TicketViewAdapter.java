@@ -20,6 +20,7 @@ public class TicketViewAdapter extends FragmentStateAdapter {
         Fragment fragment = new TicketsViewFragment();
         Bundle args = new Bundle();
         // Our object is just an integer :-P
+        args.clear();
         args.putInt(TicketsViewFragment.ARG_OBJECT, position);
 
         fragment.setArguments(args);

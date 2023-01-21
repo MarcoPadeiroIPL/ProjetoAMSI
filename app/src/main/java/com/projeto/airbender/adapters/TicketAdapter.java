@@ -18,7 +18,6 @@ import java.util.ArrayList;
 public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder> {
 
     private ArrayList<TicketInfo> localDataSet;
-
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder)

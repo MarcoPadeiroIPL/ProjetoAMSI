@@ -11,6 +11,7 @@ import com.projeto.airbender.models.Airport;
 import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.Flight;
 import com.projeto.airbender.models.Ticket;
+import com.projeto.airbender.models.TicketInfo;
 
 import java.util.ArrayList;
 
@@ -213,6 +214,34 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         return airports;
+    }
+    public ArrayList<Ticket> getAllTicketsOfflineDB() {
+        ArrayList<Ticket> tickets = new ArrayList<Ticket>();
+        Cursor cursor = db.query("ticketsOffline", new String[]{
+                "id",
+                "fName",
+                "surname",
+                "gender",
+                "age",
+                "checkedIn",
+                "client_id",
+                "flight_id",
+                "seatLinha",
+                "seatCol",
+                "luggage_1",
+                "luggage_2",
+                "receipt_id",
+                "tariff_id",
+                "tariffType"
+        }, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                Ticket ticket = new Ticket(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getInt(3), cursor.getInt(4), cursor.getInt(5), cursor.getInt(6), cursor.getString(7), cursor.getInt(8), cursor.getInt(9), cursor.getInt(10), cursor.getInt(11), cursor.getInt(12), cursor.getString(13));
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+
+        return tickets;
     }
     public ArrayList<Ticket> getAllTicketsDB() {
         ArrayList<Ticket> tickets = new ArrayList<Ticket>();

@@ -29,6 +29,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNav;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,28 +93,22 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commit();
     }
 
-    private void showSnackIfOffline(){
+    private void showSnackIfOffline() {
         final boolean online = isOnline();
         runOnUiThread(new TimerTask() { //must run on main thread to update UI (show Snackbar), can be used only in Activity (FragmentActivity, AppCompatActivity...)
             @Override
             public void run() {
-                if(!online)
-                    Snackbar.make(findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_LONG).show();
-                else{
-                /*
-                    Your code here if user is online
-                */
-                }
+                if (!online)
+                    Snackbar.make(findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
             }
         });
     }
 
-    private boolean isOnline(){
+    private boolean isOnline() {
         SharedPreferences sharedInfoUser = getSharedPreferences("settings", MODE_PRIVATE);
         try {
             return Runtime.getRuntime().exec("/system/bin/ping -c 1 " + sharedInfoUser.getString("SERVER", "10.0.2.2")).waitFor() == 0; //  "8.8.8.8" is the server to ping
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;

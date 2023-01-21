@@ -15,8 +15,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import com.projeto.airbender.adapters.BalanceReqAdapter;
 import com.projeto.airbender.listeners.BalanceReqListener;
 import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.SingletonAirbender;
+import com.projeto.airbender.utils.JsonParser;
 
 public class BalanceReqFragment extends Fragment implements BalanceReqListener {
     private RecyclerView recyclerView;
@@ -52,6 +55,10 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
         fabAddBalanceReq.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!JsonParser.isConnectionInternet(getContext())) {
+                    Snackbar.make(view, "No internet connection", Snackbar.LENGTH_SHORT).show();
+                    return;
+                }
                 final Dialog dialog = new Dialog(getContext());
 
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -62,7 +69,6 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
                 final Button btnOK = dialog.findViewById(R.id.btnOK);
 
                 btnOK.setOnClickListener((v) -> {
-
                     if (etAmount.getText().toString().isEmpty()) {
                         etAmount.setError("Amount is required");
                         etAmount.requestFocus();

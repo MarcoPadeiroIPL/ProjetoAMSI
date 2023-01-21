@@ -45,9 +45,10 @@ public class TicketFragment extends Fragment {
         viewPager = view.findViewById(R.id.pager);
         tabLayout = view.findViewById(R.id.tab_layout);
 
+        String tabTitles[] = new String[]{"Upcoming", "Pending", "Past"};
         viewPager.setAdapter(ticketViewAdapter);
         new TabLayoutMediator(tabLayout, viewPager,
-                (tab, position) -> tab.setText(position == 0 ? "Upcoming" : position == 1 ? "To complete" : "Past")
+                (tab, position) -> tab.setText(tabTitles[position])
         ).attach();
 
     }

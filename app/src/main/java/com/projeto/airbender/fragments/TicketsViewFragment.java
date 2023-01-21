@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 public class TicketsViewFragment extends Fragment implements TicketListener {
     public static final String ARG_OBJECT = "object";
     private RecyclerView recyclerView;
+    private TextView tvTitle;
 
     @Nullable
     @Override
@@ -34,6 +37,9 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
         View view = inflater.inflate(R.layout.tickets_view_fragment, container, false);
 
         recyclerView = view.findViewById(R.id.rvTickets);
+        tvTitle = view.findViewById(R.id.tvTitle);
+
+        tvTitle.setText(getArguments().getInt(ARG_OBJECT) == 0 ? "Upcoming" : getArguments().getInt(ARG_OBJECT) == 1 ? "Pending" : "Past");
 
         SingletonAirbender.getInstance(getContext()).setTicketListener(this);
 

@@ -1,5 +1,6 @@
 package com.projeto.airbender.models;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.view.View;
@@ -105,7 +106,7 @@ public class SingletonAirbender {
 
     public void loginAPI(final Context context, String username, String password) {
         if (!JsonParser.isConnectionInternet(context)) {
-            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
         } else {
             StringRequest req = new StringRequest(Request.Method.GET, makeURL(getServer(context), "login", null), new Response.Listener<String>() {
                 // Sucesso
@@ -120,16 +121,16 @@ public class SingletonAirbender {
                         public void onErrorResponse(VolleyError error) {
                             try {
                                 if (error.networkResponse.statusCode == 500) {
-                                    Toast.makeText(context, "Server error", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(context, "Server error", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 if (error.networkResponse.statusCode == 403) {
-                                    Toast.makeText(context, "Wrong credentials", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(context, "Wrong credentials", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
-                                Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
                             } catch (Exception ex) {
-                                Toast.makeText(context, "Server not found", Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, "Server not found", Toast.LENGTH_SHORT).show();
                             }
                         }
                     }
@@ -176,7 +177,7 @@ public class SingletonAirbender {
 
     public void addBalanceReq(final int amount, final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
-            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
         } else {
             try {
                 JSONObject jsonBody = new JSONObject();
@@ -211,7 +212,7 @@ public class SingletonAirbender {
 
     public void getAllBalanceReqs(final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
-            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
             balanceReqs = dbHelper.getAllBalanceReqDB();
             if (balanceReqListener != null)
                 balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
@@ -220,53 +221,95 @@ public class SingletonAirbender {
         }
     }
 
-    public void getTickets(final Context context, int position) {
-        if((position == 1 || position == 2) && !JsonParser.isConnectionInternet(context)) {
-            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
-            return;
-        }
-        if(position == 0 && !JsonParser.isConnectionInternet(context)) {
-            if (ticketListener != null)
-                //ticketListener.onRefreshTicketList(dbHelper.getAllTicketsDB());
-            return;
-        }
-        requestTicketsAPI(context);
+    private Flight findFlight(ArrayList<Flight> flights, int flight_id) {
+        for (Flight flight : flights)
+            if (flight.getId() == flight_id)
+                return flight;
+        return null;
     }
 
-    public boolean airportExists(Airport airport){
-        ArrayList<Airport> airports = dbHelper.getAllAirportsTicketsDB();
-        for(Airport a : airports){
-            if(a.getId() == airport.getId())
-                return true;
+    private Airport findAirport(ArrayList<Airport> airports, int airport_id) {
+        for (Airport airport : airports) {
+            if (airport.getId() == airport_id) {
+                return airport;
+            }
         }
-        return false;
+        return null;
     }
-
-    public boolean flightExists(Flight flight){
+    public ArrayList<TicketInfo> offlineTickets(){
+        ArrayList<TicketInfo> ticketInfo = new ArrayList<TicketInfo>();
+        ArrayList<Ticket> tickets = dbHelper.getAllTicketsOfflineDB();
         ArrayList<Flight> flights = dbHelper.getAllFlightsTicketsDB();
-        for(Flight f : flights){
-            if(f.getId() == flight.getId())
+        ArrayList<Airport> airports = dbHelper.getAllAirportsTicketsDB();
+        for (Ticket ticket : tickets) {
+            Flight flight = findFlight(flights, ticket.getFlight_id());
+            Airport airportArrival = findAirport(airports, flight.getAirportArrival());
+            Airport airportDeparture = findAirport(airports, flight.getAirportDeparture());
+
+            ticketInfo.add(new TicketInfo(ticket, airportDeparture, airportArrival, flight));
+        }
+        return ticketInfo;
+    }
+
+    public void getTickets(final Context context, int position) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            if (position == 1 || position == 2)
+                Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+            if (position == 0) {
+                if (ticketListener != null)
+                    ticketListener.onRefreshTicketList(offlineTickets());
+                Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
+            }
+        } else {
+            if (position == 0) {
+                // mosquitto call to check if message arrived
+                requestTicketsAPI(context, position);
+            } else {
+                requestTicketsAPI(context, position);
+            }
+        }
+    }
+
+    public boolean airportExists(Airport airport) {
+        ArrayList<Airport> airports = dbHelper.getAllAirportsTicketsDB();
+        for (Airport a : airports) {
+            if (a.getId() == airport.getId())
                 return true;
         }
         return false;
     }
 
-    private ArrayList<TicketInfo> requestTicketsAPI(final Context context) {
-        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "tickets", getToken(context)), null, new Response.Listener<JSONArray>() {
+    public boolean flightExists(Flight flight) {
+        ArrayList<Flight> flights = dbHelper.getAllFlightsTicketsDB();
+        for (Flight f : flights) {
+            if (f.getId() == flight.getId())
+                return true;
+        }
+        return false;
+    }
+
+    private ArrayList<TicketInfo> requestTicketsAPI(final Context context, int type) {
+        final int UPCOMING = 0, PENDING = 1, PAST = 2;
+        String path = type == UPCOMING ? "upcoming" : type == PENDING ? "pending" : "past";
+        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "tickets/" + path, getToken(context)), null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 tickets = JsonParser.parseTickets(response);
-                dbHelper.deleteAllDB("tickets");
-                dbHelper.deleteAllDB("flightsTickets");
-                dbHelper.deleteAllDB("airportsTickets");
+                if (type == UPCOMING)
+                    dbHelper.deleteAllDB("ticketsOffline");
+                else
+                    dbHelper.deleteAllDB("tickets");
                 for (TicketInfo ticket : tickets) {
-                    if(!airportExists(ticket.getAirportArrival()))
+                    if (!airportExists(ticket.getAirportArrival()))
                         dbHelper.insertDB("airportsTickets", contentValuesHelper.getAirport(ticket.getAirportArrival()));
-                    if(!airportExists(ticket.getAirportDeparture()))
+                    if (!airportExists(ticket.getAirportDeparture()))
                         dbHelper.insertDB("airportsTickets", contentValuesHelper.getAirport(ticket.getAirportDeparture()));
-                    if(!flightExists(ticket.getFlight()))
+                    if (!flightExists(ticket.getFlight()))
                         dbHelper.insertDB("flightsTickets", contentValuesHelper.getFlight(ticket.getFlight()));
-                    dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket()));
+                    if (type == UPCOMING)
+                        dbHelper.insertDB("ticketsOffline", contentValuesHelper.getTicket(ticket.getTicket()));
+                    else
+                        dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket()));
                 }
                 if (ticketListener != null)
                     ticketListener.onRefreshTicketList(tickets);
@@ -275,13 +318,17 @@ public class SingletonAirbender {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(context, error.getMessage() + "nigger", Toast.LENGTH_LONG).show();
+                        if (error.networkResponse.statusCode == 404) {
+                            return;
+                        }
+                        Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
         );
         requestQueue.add(req);
         return tickets;
     }
+
 
     public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {
         JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "balance-req", getToken(context)), null, new Response.Listener<JSONArray>() {
@@ -299,7 +346,7 @@ public class SingletonAirbender {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(context, error.getMessage() + "", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, error.getMessage() + "", Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -309,7 +356,7 @@ public class SingletonAirbender {
 
     /*public void removerLivroAPI(final Livro livro, final Context context){
         if(!LivroJsonParser.isConnectionInternet(context)){
-            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show();
         }
         else {
             StringRequest req = new StringRequest(Request.Method.DELETE, URL + "/" + livro.getId(), new Response.Listener<String>() {
@@ -322,7 +369,7 @@ public class SingletonAirbender {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
             );
@@ -332,7 +379,7 @@ public class SingletonAirbender {
 
     public void editarLivroAPI(final Livro livro, final Context context){
         if(!LivroJsonParser.isConnectionInternet(context)){
-            Toast.makeText(context, "Sem ligação à internet", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show();
         }
         else {
             StringRequest req = new StringRequest(Request.Method.PUT, URL + "/" + livro.getId(), new Response.Listener<String>() {
@@ -345,7 +392,7 @@ public class SingletonAirbender {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
             ){
