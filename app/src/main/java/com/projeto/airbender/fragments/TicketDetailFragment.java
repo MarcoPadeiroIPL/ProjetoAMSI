@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -26,9 +29,11 @@ public class TicketDetailFragment extends Fragment {
     private FloatingActionButton fabBack;
     private MainActivity activity;
     private TextView tvAirportDeparture, tvAirportArrival, tvDate;
+    private int position;
 
-    public TicketDetailFragment(TicketInfo ticketInfo) {
+    public TicketDetailFragment(TicketInfo ticketInfo, int position) {
         this.ticketInfo = ticketInfo;
+        this.position = position;
     }
 
 
@@ -47,14 +52,36 @@ public class TicketDetailFragment extends Fragment {
         fabCheckin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.replaceFragment(new GenerateQRCodeFragment(ticketInfo), true);
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.setCustomAnimations(
+                        R.anim.slide_in,  // enter
+                        R.anim.fade_out,  // exit
+                        R.anim.fade_in,   // popEnter
+                        R.anim.slide_out  // popExit
+                );
+
+                fragmentTransaction.replace(R.id.frameLayout, new GenerateQRCodeFragment(ticketInfo));
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
             }
         });
 
         fabBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.onBackPressed();
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.setCustomAnimations(
+                        R.anim.slide_in,  // enter
+                        R.anim.fade_out,  // exit
+                        R.anim.fade_in,   // popEnter
+                        R.anim.slide_out  // popExit
+                );
+
+                fragmentTransaction.replace(R.id.frameLayout, new TicketFragment(position));
+                fragmentTransaction.commit();
+
             }
         });
 

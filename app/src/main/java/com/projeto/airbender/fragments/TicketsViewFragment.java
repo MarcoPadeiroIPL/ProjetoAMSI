@@ -1,5 +1,6 @@
 package com.projeto.airbender.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,11 +42,11 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
         recyclerView = view.findViewById(R.id.rvTickets);
         tvTitle = view.findViewById(R.id.tvTitle);
 
-        tvTitle.setText(getArguments().getInt(ARG_OBJECT) == 0 ? "Upcoming" : getArguments().getInt(ARG_OBJECT) == 1 ? "Pending" : "Past");
+        tvTitle.setText(getArguments().getInt(ARG_OBJECT) == 0 ? "Upcoming" : "Pending");
+
+        recyclerView.setAdapter(new TicketAdapter(new ArrayList<>(), this));
 
         SingletonAirbender.getInstance(getContext()).setTicketListener(this);
-
-        recyclerView.setAdapter(new TicketAdapter(new ArrayList<TicketInfo>(), this));
 
         SingletonAirbender.getInstance(getContext()).getTickets(getContext(), getArguments().getInt(ARG_OBJECT));
 
@@ -67,8 +68,14 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
     public void onItemClicked(TicketInfo ticket) {
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.frameLayout, new TicketDetailFragment(ticket));
-        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.setCustomAnimations(
+                R.anim.slide_in,  // enter
+                R.anim.fade_out,  // exit
+                R.anim.fade_in,   // popEnter
+                R.anim.slide_out  // popExit
+        );
+
+        fragmentTransaction.replace(R.id.frameLayout, new TicketDetailFragment(ticket, getArguments().getInt(ARG_OBJECT)));
         fragmentTransaction.commit();
 
     }

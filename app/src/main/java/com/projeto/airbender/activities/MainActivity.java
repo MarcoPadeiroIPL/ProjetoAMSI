@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                     replaceFragment(new HomeFragment(), false);
                     break;
                 case R.id.navTickets:
-                    replaceFragment(new TicketFragment(), false);
+                    replaceFragment(new TicketFragment(0), false);
                     break;
                 case R.id.navBalanceReq:
                     replaceFragment(new BalanceReqFragment(), false);
