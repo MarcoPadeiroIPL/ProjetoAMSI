@@ -121,19 +121,19 @@ public class JsonParser {
             ticket = new Ticket(json.optInt("id"), json.optString("fName"), json.optString("surname"),
                     json.optString("gender"), json.optInt("age"), json.optInt("checkedIn"), json.optInt("client_id"),
                     json.optInt("flight_id"), json.optString("seatLinha"), json.optInt("seatCol"), json.optInt("luggage_1"),
-                    json.optInt("luggage_2"), json.optInt("receipt_id"), json.optInt("tariff_id"), json.optString("tariffType"));
+                    json.optInt("luggage_2"), json.optInt("receipt_id"), json.optInt("tariff_id"), json.optString("tariffType"),"a");
 
             JSONObject jsonFlight = json.getJSONObject("flight");
             flight = new Flight(jsonFlight.optInt("id"), jsonFlight.optString("departureDate"), json.optString("duration"),
-                    jsonFlight.optInt("airplane_id"), jsonFlight.optInt("airportDeparture_id"), jsonFlight.optInt("airportArrival_id"), jsonFlight.optString("status"));
+                    jsonFlight.optInt("airplane_id"), jsonFlight.optInt("airportDeparture_id"), jsonFlight.optInt("airportArrival_id"), jsonFlight.optString("status"), "a");
 
             JSONObject jsonAirportArrival = jsonFlight.getJSONObject("airportArrival");
             airportArrival = new Airport(jsonAirportArrival.optInt("id"), jsonAirportArrival.optString("country"), jsonAirportArrival.optString("code"),
-                    jsonAirportArrival.optString("city"), jsonAirportArrival.optInt("search"), jsonAirportArrival.optString("status"));
+                    jsonAirportArrival.optString("city"), jsonAirportArrival.optInt("search"), jsonAirportArrival.optString("status"), "a");
 
             JSONObject jsonAirportDeparture = jsonFlight.getJSONObject("airportDeparture");
             airportDeparture = new Airport(jsonAirportDeparture.optInt("id"), jsonAirportDeparture.optString("country"), jsonAirportDeparture.optString("code"),
-                    jsonAirportDeparture.optString("city"), jsonAirportDeparture.optInt("search"), jsonAirportDeparture.optString("status"));
+                    jsonAirportDeparture.optString("city"), jsonAirportDeparture.optInt("search"), jsonAirportDeparture.optString("status"), "a");
 
             ticketInfo = new TicketInfo(ticket, airportDeparture, airportArrival, flight);
         } catch (JSONException e) {
@@ -154,19 +154,19 @@ public class JsonParser {
                 ticket = new Ticket(json.optInt("id"), json.optString("fName"), json.optString("surname"),
                         json.optString("gender"), json.optInt("age"), json.optInt("checkedIn"), json.optInt("client_id"),
                         json.optInt("flight_id"), json.optString("seatLinha"), json.optInt("seatCol"), json.optInt("luggage_1"),
-                        json.optInt("luggage_2"), json.optInt("receipt_id"), json.optInt("tariff_id"), json.optString("tariffType"));
+                        json.optInt("luggage_2"), json.optInt("receipt_id"), json.optInt("tariff_id"), json.optString("tariffType"), "A");
 
                 JSONObject jsonFlight = json.getJSONObject("flight");
-                flight = new Flight(jsonFlight.optInt("id"), jsonFlight.optString("departureDate"), json.optString("duration"),
-                        jsonFlight.optInt("airplane_id"), jsonFlight.optInt("airportDeparture_id"), jsonFlight.optInt("airportArrival_id"), jsonFlight.optString("status"));
+                flight = new Flight(jsonFlight.optInt("id"), jsonFlight.optString("departureDate"), jsonFlight.optString("duration"),
+                        jsonFlight.optInt("airplane_id"), jsonFlight.optInt("airportDeparture_id"), jsonFlight.optInt("airportArrival_id"), jsonFlight.optString("status"), "a");
 
                 JSONObject jsonAirportArrival = jsonFlight.getJSONObject("airportArrival");
                 airportArrival = new Airport(jsonAirportArrival.optInt("id"), jsonAirportArrival.optString("country"), jsonAirportArrival.optString("code"),
-                        jsonAirportArrival.optString("city"), jsonAirportArrival.optInt("search"), jsonAirportArrival.optString("status"));
+                        jsonAirportArrival.optString("city"), jsonAirportArrival.optInt("search"), jsonAirportArrival.optString("status"), "a");
 
                 JSONObject jsonAirportDeparture = jsonFlight.getJSONObject("airportDeparture");
                 airportDeparture = new Airport(jsonAirportDeparture.optInt("id"), jsonAirportDeparture.optString("country"), jsonAirportDeparture.optString("code"),
-                        jsonAirportDeparture.optString("city"), jsonAirportDeparture.optInt("search"), jsonAirportDeparture.optString("status"));
+                        jsonAirportDeparture.optString("city"), jsonAirportDeparture.optInt("search"), jsonAirportDeparture.optString("status"), "a");
 
                 ticketsInfo.add(new TicketInfo(ticket, airportDeparture, airportArrival, flight));
             }

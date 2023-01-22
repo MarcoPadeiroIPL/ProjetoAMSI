@@ -16,8 +16,9 @@ public class Ticket {
     private int receipt_id;
     private int tariff_id;
     private String tariffType;
+    private String type;
 
-    public Ticket(int id, String fName, String surname, String gender, int age, int checkedIn, int client_id, int flight_id, String seatLinha, int seatCol, int luggage_1, int luggage_2, int receipt_id, int tariff_id, String tariffType) {
+    public Ticket(int id, String fName, String surname, String gender, int age, int checkedIn, int client_id, int flight_id, String seatLinha, int seatCol, int luggage_1, int luggage_2, int receipt_id, int tariff_id, String tariffType, String type) {
         this.id = id;
         this.fName = fName;
         this.surname = surname;
@@ -33,6 +34,7 @@ public class Ticket {
         this.receipt_id = receipt_id;
         this.tariff_id = tariff_id;
         this.tariffType = tariffType;
+        this.type = type;
     }
 
     public void setId(int id) {
@@ -155,13 +157,11 @@ public class Ticket {
         this.tariffType = tariffType;
     }
 
-    public String getAirportDeparture(){
-       return "Warsaw Chopin";
+    public String getType() {
+        return type;
     }
-    public String getAirportArrival(){
-        return "Lisbon";
-    }
-    public String getDate(){
-        return "Fri 22 Jul 21:15";
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

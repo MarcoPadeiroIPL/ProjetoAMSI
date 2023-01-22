@@ -7,15 +7,16 @@ public class Airport {
     private String city;
     private int search;
     private String status;
+    private String type;
 
-
-    public Airport(int id, String country, String code, String city, int search, String status) {
+    public Airport(int id, String country, String code, String city, int search, String status, String type) {
         this.id = id;
         this.country = country;
         this.code = code;
         this.city = city;
         this.search = search;
         this.status = status;
+        this.type = type;
     }
 
     public void setId(int id) {
@@ -60,6 +61,14 @@ public class Airport {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public void setStatus(String status) {

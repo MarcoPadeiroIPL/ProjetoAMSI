@@ -30,7 +30,7 @@ public class ContentValuesHelper {
         return values;
     }
 
-    public ContentValues getAirport(Airport airport) {
+    public ContentValues getAirport(Airport airport, String type) {
         ContentValues values = new ContentValues();
         values.put("id", airport.getId());
         values.put("country", airport.getCountry());
@@ -38,6 +38,7 @@ public class ContentValuesHelper {
         values.put("city", airport.getCity());
         values.put("search", airport.getSearch());
         values.put("status", airport.getStatus());
+        values.put("type", type);
         return values;
     }
     public ContentValues getBalanceReq(BalanceReq balanceReq) {
@@ -61,7 +62,7 @@ public class ContentValuesHelper {
         return values;
     }
 
-    public ContentValues getFlight(Flight flight) {
+    public ContentValues getFlight(Flight flight, String type) {
         ContentValues values = new ContentValues();
         values.put("id", flight.getId());
         values.put("departureDate", flight.getDepartureDate());
@@ -70,10 +71,11 @@ public class ContentValuesHelper {
         values.put("airportDeparture_id", flight.getAirportDeparture());
         values.put("airportArrival_id", flight.getAirportArrival());
         values.put("status", flight.getStatus());
+        values.put("type", type);
         return values;
     }
 
-    public ContentValues getTariff(Tariff tariff) {
+    public ContentValues getTariff(Tariff tariff, String type) {
         ContentValues values = new ContentValues();
         values.put("id", tariff.getId());
         values.put("startDate", tariff.getStartDate());
@@ -82,10 +84,11 @@ public class ContentValuesHelper {
         values.put("luxuryPrice", tariff.getLuxuryPrice());
         values.put("flight_id", tariff.getFlight_id());
         values.put("active", tariff.isActive());
+        values.put("type", type);
         return values;
     }
 
-    public ContentValues getTicket(Ticket ticket) {
+    public ContentValues getTicket(Ticket ticket, String type) {
         ContentValues values = new ContentValues();
         values.put("id", ticket.getId());
         values.put("fName", ticket.getfName());
@@ -102,6 +105,7 @@ public class ContentValuesHelper {
         values.put("receipt_id", ticket.getReceipt_id());
         values.put("tariff_id", ticket.getTariff_id());
         values.put("tariffType", ticket.getTariffType());
+        values.put("type", type);
         return values;
     }
 

@@ -8,9 +8,10 @@ public class Flight {
     private int airportDeparture_id;
     private int airportArrival_id;
     private String status;
+    private String type;
 
 
-    public Flight(int id, String departureDate, String duration, int airplane_id, int airportDeparture_id, int airportArrival_id, String status) {
+    public Flight(int id, String departureDate, String duration, int airplane_id, int airportDeparture_id, int airportArrival_id, String status, String type) {
         this.id = id;
         this.departureDate = departureDate;
         this.duration = duration;
@@ -18,6 +19,7 @@ public class Flight {
         this.airportDeparture_id = airportDeparture_id;
         this.airportArrival_id = airportArrival_id;
         this.status = status;
+        this.type = type;
     }
 
     public void setId(int id) {
@@ -73,5 +75,13 @@ public class Flight {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

@@ -53,7 +53,8 @@ public class SingletonAirbender {
 
     private LoginListener loginListener;
     private BalanceReqListener balanceReqListener;
-    private TicketListener ticketListener;
+    private TicketListener ticketUpcomingListener;
+    private TicketListener ticketPendingListener;
 
     private ContentValuesHelper contentValuesHelper;
 
@@ -100,8 +101,12 @@ public class SingletonAirbender {
         this.balanceReqListener = balanceReqListener;
     }
 
-    public void setTicketListener(TicketListener ticketListener) {
-        this.ticketListener = ticketListener;
+    public void setTicketPendingListener(TicketListener ticketListener) {
+        this.ticketPendingListener = ticketListener;
+    }
+
+    public void setTicketUpcomingListener(TicketListener ticketListener) {
+        this.ticketUpcomingListener = ticketListener;
     }
 
     public void updateUserData(final Context context) {
@@ -139,6 +144,7 @@ public class SingletonAirbender {
         }
 
     }
+
     public void loginAPI(final Context context, String username, String password) {
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
@@ -248,9 +254,9 @@ public class SingletonAirbender {
     public void getAllBalanceReqs(final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
-            balanceReqs = dbHelper.getAllBalanceReqDB();
+            balanceReqs = dbHelper.getBalanceReq();
             if (balanceReqListener != null)
-                balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
+                balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
         } else {
             requestBalanceReqsAPI(context);
         }
@@ -271,11 +277,12 @@ public class SingletonAirbender {
         }
         return null;
     }
-    public ArrayList<TicketInfo> offlineTickets(){
+
+    public ArrayList<TicketInfo> getTicketsFromDB(String type) {
         ArrayList<TicketInfo> ticketInfo = new ArrayList<TicketInfo>();
-        ArrayList<Ticket> tickets = dbHelper.getAllTicketsOfflineDB();
-        ArrayList<Flight> flights = dbHelper.getAllFlightsTicketsDB();
-        ArrayList<Airport> airports = dbHelper.getAllAirportsTicketsDB();
+        ArrayList<Ticket> tickets = dbHelper.getTickets("type", type);
+        ArrayList<Flight> flights = dbHelper.getFlights("type", type);
+        ArrayList<Airport> airports = dbHelper.getAirports("type", type);
         for (Ticket ticket : tickets) {
             Flight flight = findFlight(flights, ticket.getFlight_id());
             Airport airportArrival = findAirport(airports, flight.getAirportArrival());
@@ -291,8 +298,8 @@ public class SingletonAirbender {
             if (position == 1 || position == 2)
                 Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
             if (position == 0) {
-                if (ticketListener != null)
-                    ticketListener.onRefreshTicketList(offlineTickets());
+                if (ticketUpcomingListener != null)
+                    ticketUpcomingListener.onRefreshTicketList(getTicketsFromDB("upcoming"));
                 Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
             }
         } else {
@@ -306,7 +313,7 @@ public class SingletonAirbender {
     }
 
     public boolean airportExists(Airport airport) {
-        ArrayList<Airport> airports = dbHelper.getAllAirportsTicketsDB();
+        ArrayList<Airport> airports = dbHelper.getAllAirports();
         for (Airport a : airports) {
             if (a.getId() == airport.getId())
                 return true;
@@ -314,8 +321,26 @@ public class SingletonAirbender {
         return false;
     }
 
+    public void replaceAirportToUpcoming(Airport airport) {
+        ArrayList<Airport> airports = dbHelper.getAllAirports();
+        for (Airport a : airports) {
+            if (a.getId() == airport.getId() && !Objects.equals(a.getType(), "upcoming")) {
+                dbHelper.updateDB("airports", contentValuesHelper.getAirport(airport, "upcoming"));
+            }
+        }
+    }
+
+    public void replaceFlightToUpcoming(Flight flight) {
+        ArrayList<Flight> flights = dbHelper.getAllFlights();
+        for (Flight f : flights) {
+            if (f.getId() == flight.getId() && !Objects.equals(f.getType(), "upcoming")) {
+                dbHelper.updateDB("flights", contentValuesHelper.getFlight(flight, "upcoming"));
+            }
+        }
+    }
+
     public boolean flightExists(Flight flight) {
-        ArrayList<Flight> flights = dbHelper.getAllFlightsTicketsDB();
+        ArrayList<Flight> flights = dbHelper.getAllFlights();
         for (Flight f : flights) {
             if (f.getId() == flight.getId())
                 return true;
@@ -330,24 +355,35 @@ public class SingletonAirbender {
             @Override
             public void onResponse(JSONArray response) {
                 tickets = JsonParser.parseTickets(response);
-                if (type == UPCOMING)
-                    dbHelper.deleteAllDB("ticketsOffline");
-                else
-                    dbHelper.deleteAllDB("tickets");
+                //dbHelper.deleteDB("tickets", "type", path);
+                dbHelper.deleteDB("airports", "type", path);
+                dbHelper.deleteDB("flights", "type", path);
+                dbHelper.deleteDB("tickets", "type", path);
+
                 for (TicketInfo ticket : tickets) {
                     if (!airportExists(ticket.getAirportArrival()))
-                        dbHelper.insertDB("airportsTickets", contentValuesHelper.getAirport(ticket.getAirportArrival()));
-                    if (!airportExists(ticket.getAirportDeparture()))
-                        dbHelper.insertDB("airportsTickets", contentValuesHelper.getAirport(ticket.getAirportDeparture()));
-                    if (!flightExists(ticket.getFlight()))
-                        dbHelper.insertDB("flightsTickets", contentValuesHelper.getFlight(ticket.getFlight()));
-                    if (type == UPCOMING)
-                        dbHelper.insertDB("ticketsOffline", contentValuesHelper.getTicket(ticket.getTicket()));
+                        dbHelper.insertDB("airports", contentValuesHelper.getAirport(ticket.getAirportArrival(), path));
                     else
-                        dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket()));
+                        replaceAirportToUpcoming(ticket.getAirportArrival());
+                    if (!airportExists(ticket.getAirportDeparture()))
+                        dbHelper.insertDB("airports", contentValuesHelper.getAirport(ticket.getAirportDeparture(), path));
+                    else
+                        replaceAirportToUpcoming(ticket.getAirportArrival());
+                    if (!flightExists(ticket.getFlight()))
+                        dbHelper.insertDB("flights", contentValuesHelper.getFlight(ticket.getFlight(), path));
+                    else
+                        replaceFlightToUpcoming(ticket.getFlight());
+                    dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket(), path));
                 }
-                if (ticketListener != null)
-                    ticketListener.onRefreshTicketList(tickets);
+                if (type == UPCOMING) {
+                    if (ticketUpcomingListener != null) {
+                        ticketUpcomingListener.onRefreshTicketList(tickets);
+                    }
+                } else if (type == PENDING) {
+                    if (ticketPendingListener != null) {
+                        ticketPendingListener.onRefreshTicketList(tickets);
+                    }
+                }
             }
         },
                 new Response.ErrorListener() {
@@ -376,7 +412,7 @@ public class SingletonAirbender {
                     dbHelper.insertDB("balanceReq", contentValuesHelper.getBalanceReq(balanceReq));
                 }
                 if (balanceReqListener != null)
-                    balanceReqListener.onRefreshBalanceReqList(dbHelper.getAllBalanceReqDB());
+                    balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
             }
         },
                 new Response.ErrorListener() {

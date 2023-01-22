@@ -49,7 +49,11 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
 
         recyclerView.setAdapter(new TicketAdapter(new ArrayList<>(), this));
 
-        SingletonAirbender.getInstance(getContext()).setTicketListener(this);
+        if(getArguments().getInt(ARG_OBJECT) == 0) {
+            SingletonAirbender.getInstance(getContext()).setTicketUpcomingListener(this);
+        } else {
+            SingletonAirbender.getInstance(getContext()).setTicketPendingListener(this);
+        }
 
         SingletonAirbender.getInstance(getContext()).getTickets(getContext(), getArguments().getInt(ARG_OBJECT));
 
