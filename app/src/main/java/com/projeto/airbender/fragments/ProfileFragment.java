@@ -15,12 +15,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 import com.projeto.airbender.activities.LoginActivity;
 import com.projeto.airbender.activities.MainActivity;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.models.SingletonAirbender;
 import com.projeto.airbender.utils.DBHelper;
+import com.projeto.airbender.utils.JsonParser;
 
 import java.util.Map;
 

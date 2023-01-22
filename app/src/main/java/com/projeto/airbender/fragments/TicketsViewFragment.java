@@ -27,6 +27,7 @@ import com.projeto.airbender.models.Ticket;
 import com.projeto.airbender.models.TicketInfo;
 
 import java.util.ArrayList;
+import java.util.concurrent.BlockingDeque;
 
 // Instances of this class are fragments representing a single
 // object in our collection.
@@ -35,6 +36,7 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
     private RecyclerView recyclerView;
     private TextView tvTitle;
     private SwipeRefreshLayout pullToRefresh;
+    private TicketAdapter ticketAdapter;
 
     @Nullable
     @Override
@@ -47,7 +49,8 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
 
         tvTitle.setText(getArguments().getInt(ARG_OBJECT) == 0 ? "Upcoming" : getArguments().getInt(ARG_OBJECT) == 1 ? "Pending" : "Past");
 
-        recyclerView.setAdapter(new TicketAdapter(new ArrayList<>(), this));
+        ticketAdapter = new TicketAdapter(new ArrayList<TicketInfo>(),this);
+        recyclerView.setAdapter(ticketAdapter);
 
         switch (getArguments().getInt(ARG_OBJECT)) {
             case 0:
@@ -60,14 +63,17 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
                 SingletonAirbender.getInstance(getContext()).setTicketPastListener(this);
                 break;
         }
-        SingletonAirbender.getInstance(getContext()).getTickets(getContext(), getArguments().getInt(ARG_OBJECT));
+        if(getArguments().getInt(ARG_OBJECT) == 0)
+            SingletonAirbender.getInstance(getContext()).getTicketsFromDB(getArguments().getInt(ARG_OBJECT));
+        else
+            SingletonAirbender.getInstance(getContext()).requestTicketsAPI(getContext(), getArguments().getInt(ARG_OBJECT));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
 
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                SingletonAirbender.getInstance(getContext()).getTickets(getContext(), getArguments().getInt(ARG_OBJECT));
+                SingletonAirbender.getInstance(getContext()).requestTicketsAPI(getContext(), getArguments().getInt(ARG_OBJECT));
                 pullToRefresh.setRefreshing(false);
             }
         });
@@ -80,7 +86,8 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
 
     @Override
     public void onRefreshTicketList(ArrayList<TicketInfo> tickets) {
-        recyclerView.setAdapter(new TicketAdapter(tickets, this));
+        ticketAdapter = new TicketAdapter(tickets, this);
+        recyclerView.setAdapter(ticketAdapter);
     }
 
     @Override
@@ -95,6 +102,7 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
         );
 
         fragmentTransaction.replace(R.id.frameLayout, new TicketDetailFragment(ticket, getArguments().getInt(ARG_OBJECT)));
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
 
     }

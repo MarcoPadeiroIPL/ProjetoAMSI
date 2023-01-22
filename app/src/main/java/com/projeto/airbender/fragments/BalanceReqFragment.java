@@ -35,6 +35,13 @@ import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.SingletonAirbender;
 import com.projeto.airbender.utils.JsonParser;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttSecurityException;
+
 public class BalanceReqFragment extends Fragment implements BalanceReqListener {
     private RecyclerView recyclerView;
     private FloatingActionButton fabAddBalanceReq;
@@ -59,9 +66,10 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
 
         recyclerView.setAdapter(balanceReqAdapter);
 
-        SingletonAirbender.getInstance(getContext()).getAllBalanceReqs(getContext());
+        SingletonAirbender.getInstance(getContext()).getAllBalanceReqsDB(getContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
+
 
         ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -101,7 +109,7 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                SingletonAirbender.getInstance(getContext()).getAllBalanceReqs(getContext());
+                SingletonAirbender.getInstance(getContext()).requestBalanceReqsAPI(getContext());
                 pullToRefresh.setRefreshing(false);
             }
         });

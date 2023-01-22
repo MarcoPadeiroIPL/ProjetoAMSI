@@ -19,6 +19,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.snackbar.Snackbar;
+import com.projeto.airbender.activities.LoginActivity;
 import com.projeto.airbender.listeners.BalanceReqListener;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.listeners.TicketListener;
@@ -116,7 +117,7 @@ public class SingletonAirbender {
 
     public void updateUserData(final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
-            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+            return;
         } else {
             StringRequest req = new StringRequest(Request.Method.GET, makeURL(getServer(context), "user", getToken(context)), new Response.Listener<String>() {
                 // Sucesso
@@ -152,7 +153,7 @@ public class SingletonAirbender {
 
     public void loginAPI(final Context context, String username, String password) {
         if (!JsonParser.isConnectionInternet(context)) {
-            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show();
         } else {
             StringRequest req = new StringRequest(Request.Method.GET, makeURL(getServer(context), "login", null), new Response.Listener<String>() {
                 // Sucesso
@@ -221,51 +222,6 @@ public class SingletonAirbender {
             livroBD.editarLivroDB(livro);
     }*/
 
-    public void addBalanceReq(final int amount, final Context context) {
-        if (!JsonParser.isConnectionInternet(context)) {
-            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
-        } else {
-            try {
-                JSONObject jsonBody = new JSONObject();
-                jsonBody.put("amount", amount);
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, makeURL(getServer(context), "balance-req", getToken(context)), jsonBody,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                getAllBalanceReqs(context);
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // Handle the error
-                    }
-                }
-
-                ) {
-                    @Override
-                    public Map<String, String> getHeaders() {
-                        HashMap<String, String> headers = new HashMap<String, String>();
-                        headers.put("Content-Type", "application/json; charset=utf-8");
-                        return headers;
-                    }
-                };
-                requestQueue.add(jsonObjectRequest);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void getAllBalanceReqs(final Context context) {
-        if (!JsonParser.isConnectionInternet(context)) {
-            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
-            balanceReqs = dbHelper.getBalanceReq();
-            if (balanceReqListener != null)
-                balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
-        } else {
-            requestBalanceReqsAPI(context);
-        }
-    }
 
     private Flight findFlight(ArrayList<Flight> flights, int flight_id) {
         for (Flight flight : flights)
@@ -281,40 +237,6 @@ public class SingletonAirbender {
             }
         }
         return null;
-    }
-
-    public ArrayList<TicketInfo> getTicketsFromDB(String type) {
-        ArrayList<TicketInfo> ticketInfo = new ArrayList<TicketInfo>();
-        ArrayList<Ticket> tickets = dbHelper.getTickets("type", type);
-        ArrayList<Flight> flights = dbHelper.getFlights("type", type);
-        ArrayList<Airport> airports = dbHelper.getAirports("type", type);
-        for (Ticket ticket : tickets) {
-            Flight flight = findFlight(flights, ticket.getFlight_id());
-            Airport airportArrival = findAirport(airports, flight.getAirportArrival());
-            Airport airportDeparture = findAirport(airports, flight.getAirportDeparture());
-
-            ticketInfo.add(new TicketInfo(ticket, airportDeparture, airportArrival, flight));
-        }
-        return ticketInfo;
-    }
-
-    public void getTickets(final Context context, int position) {
-        if (!JsonParser.isConnectionInternet(context)) {
-            if (position == 1 || position == 2)
-                Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
-            if (position == 0) {
-                if (ticketUpcomingListener != null)
-                    ticketUpcomingListener.onRefreshTicketList(getTicketsFromDB("upcoming"));
-                Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
-            }
-        } else {
-            if (position == 0) {
-                // mosquitto call to check if message arrived
-                requestTicketsAPI(context, position);
-            } else {
-                requestTicketsAPI(context, position);
-            }
-        }
     }
 
     public boolean airportExists(Airport airport) {
@@ -353,9 +275,31 @@ public class SingletonAirbender {
         return false;
     }
 
-    private ArrayList<TicketInfo> requestTicketsAPI(final Context context, int type) {
+    public void getTicketsFromDB(int position) {
         final int UPCOMING = 0, PENDING = 1, PAST = 2;
-        String path = type == UPCOMING ? "upcoming" : type == PENDING ? "pending" : "past";
+        String type = position == UPCOMING ? "upcoming" : position == PENDING ? "pending" : "past";
+        ArrayList<TicketInfo> ticketInfo = new ArrayList<TicketInfo>();
+        ArrayList<Ticket> tickets = dbHelper.getTickets("type", type);
+        ArrayList<Flight> flights = dbHelper.getFlights("type", type);
+        ArrayList<Airport> airports = dbHelper.getAirports("type", type);
+        for (Ticket ticket : tickets) {
+            Flight flight = findFlight(flights, ticket.getFlight_id());
+            Airport airportArrival = findAirport(airports, flight.getAirportArrival());
+            Airport airportDeparture = findAirport(airports, flight.getAirportDeparture());
+
+            ticketInfo.add(new TicketInfo(ticket, airportDeparture, airportArrival, flight));
+        }
+        if (ticketUpcomingListener != null)
+            ticketUpcomingListener.onRefreshTicketList(ticketInfo);
+    }
+
+    public void requestTicketsAPI(final Context context, int position) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        final int UPCOMING = 0, PENDING = 1, PAST = 2;
+        String path = position == UPCOMING ? "upcoming" : position == PENDING ? "pending" : "past";
         JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "tickets/" + path, getToken(context)), null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -380,10 +324,10 @@ public class SingletonAirbender {
                         replaceFlightToUpcoming(ticket.getFlight());
                     dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket(), path));
                 }
-                if (type == UPCOMING) {
+                if (position == UPCOMING) {
                     if (ticketUpcomingListener != null)
                         ticketUpcomingListener.onRefreshTicketList(tickets);
-                } else if (type == PENDING) {
+                } else if (position == PENDING) {
                     if (ticketPendingListener != null)
                         ticketPendingListener.onRefreshTicketList(tickets);
                 } else {
@@ -399,31 +343,73 @@ public class SingletonAirbender {
                 }
         );
         requestQueue.add(req);
-        return tickets;
     }
 
+    public void getAllBalanceReqsDB(final Context context) {
+        if (balanceReqListener != null)
+            balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
+    }
 
-    public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {
-        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "balance-req", getToken(context)), null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                balanceReqs = JsonParser.parseBalanceReqs(response);
-                dbHelper.deleteAllDB("balanceReq");
-                for (BalanceReq balanceReq : balanceReqs) {
-                    dbHelper.insertDB("balanceReq", contentValuesHelper.getBalanceReq(balanceReq));
-                }
-                if (balanceReqListener != null)
-                    balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
-            }
-        },
-                new Response.ErrorListener() {
+    public void addBalanceReq(final int amount, final Context context) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+        } else {
+            try {
+                JSONObject jsonBody = new JSONObject();
+                jsonBody.put("amount", amount);
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, makeURL(getServer(context), "balance-req", getToken(context)), jsonBody,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                requestBalanceReqsAPI(context);
+                            }
+                        }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(context, error.getMessage() + "", Toast.LENGTH_SHORT).show();
+                        // Handle the error
                     }
                 }
-        );
-        requestQueue.add(req);
+
+                ) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> headers = new HashMap<String, String>();
+                        headers.put("Content-Type", "application/json; charset=utf-8");
+                        return headers;
+                    }
+                };
+                requestQueue.add(jsonObjectRequest);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
+        } else {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "balance-req", getToken(context)), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    balanceReqs = JsonParser.parseBalanceReqs(response);
+                    dbHelper.deleteAllDB("balanceReq");
+                    for (BalanceReq balanceReq : balanceReqs) {
+                        dbHelper.insertDB("balanceReq", contentValuesHelper.getBalanceReq(balanceReq));
+                    }
+                    if (balanceReqListener != null)
+                        balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
+                }
+            },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(context, error.getMessage() + "", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+            requestQueue.add(req);
+        }
         return balanceReqs;
     }
 
@@ -438,13 +424,14 @@ public class SingletonAirbender {
                     dbHelper.deleteID("balanceReq", balanceReq.getId());
                     if (balanceReqListener != null)
                         balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
+                    Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Deleted successfully!", Snackbar.LENGTH_SHORT).show();
                     success[0] = true;
                 }
             },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            if(error.networkResponse.statusCode == 403) {
+                            if (error.networkResponse.statusCode == 403) {
                                 Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Cannot delete decided balance requests", Snackbar.LENGTH_SHORT).show();
                             }
                             success[0] = false;

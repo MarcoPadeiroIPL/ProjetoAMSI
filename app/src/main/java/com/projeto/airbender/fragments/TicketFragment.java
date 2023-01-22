@@ -28,11 +28,9 @@ public class TicketFragment extends Fragment {
     private TicketViewAdapter ticketViewAdapter;
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
-    private int currentPage;
 
-    public TicketFragment(int currentPage) {
+    public TicketFragment() {
         // Required empty public constructor
-        this.currentPage = currentPage;
     }
 
 
@@ -52,13 +50,5 @@ public class TicketFragment extends Fragment {
         ).attach();
         return view;
     }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        viewPager.setCurrentItem(currentPage, false);
-
-    }
-
-
 }
 

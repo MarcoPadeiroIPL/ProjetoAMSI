@@ -73,18 +73,7 @@ public class TicketDetailFragment extends Fragment {
         fabBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.setCustomAnimations(
-                        R.anim.slide_in,  // enter
-                        R.anim.fade_out,  // exit
-                        R.anim.fade_in,   // popEnter
-                        R.anim.slide_out  // popExit
-                );
-
-                fragmentTransaction.replace(R.id.frameLayout, new TicketFragment(position));
-                fragmentTransaction.commit();
-
+                activity.onBackPressed();
             }
         });
 
