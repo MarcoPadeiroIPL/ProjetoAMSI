@@ -59,19 +59,29 @@ public class JsonParser {
         return livroAux;
     }*/
 
+    public static Map<String, String> parseJsonUpdateUserData(String response) {
+        Map<String, String> map = new HashMap<String, String>();
+        try {
+            JSONObject user = new JSONObject(response);
+            map.put("username", user.getString("username"));
+            map.put("fName", user.getJSONObject("userData").getString("fName"));
+            map.put("surname", user.getJSONObject("userData").getString("surname"));
+            map.put("nif", user.getJSONObject("userData").getString("nif"));
+            map.put("phone", user.getJSONObject("userData").getString("phone"));
+            map.put("balance", String.valueOf(user.getJSONObject("client").getDouble("balance")));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
     public static Map<String, String> parserJsonLogin(String response) {
         Map<String, String> map = new HashMap<String, String>();
-        map.put("token", null);
-        map.put("role", null);
-        map.put("fName", null);
-        map.put("surname", null);
-        map.put("nif", null);
-        map.put("phone", null);
-        map.put("balance", null);
         try {
             JSONObject login = new JSONObject(response);
+            System.out.println(login);
             map.put("token", login.getString("token"));
             map.put("role", login.getString("role"));
+            map.put("username", login.getString("username"));
             map.put("fName", login.getString("fName"));
             map.put("surname", login.getString("surname"));
             map.put("nif", login.getString("nif"));
@@ -190,4 +200,5 @@ public class JsonParser {
         Network ni = cm.getActiveNetwork();
         return ni != null && cm.getNetworkInfo(ni).isConnected();
     }
+
 }

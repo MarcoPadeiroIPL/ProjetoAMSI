@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.projeto.airbender.R;
 import com.projeto.airbender.adapters.BalanceReqAdapter;
@@ -33,6 +34,7 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
     public static final String ARG_OBJECT = "object";
     private RecyclerView recyclerView;
     private TextView tvTitle;
+    private SwipeRefreshLayout pullToRefresh;
 
     @Nullable
     @Override
@@ -41,6 +43,7 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
 
         recyclerView = view.findViewById(R.id.rvTickets);
         tvTitle = view.findViewById(R.id.tvTitle);
+        pullToRefresh = view.findViewById(R.id.pullToRefresh);
 
         tvTitle.setText(getArguments().getInt(ARG_OBJECT) == 0 ? "Upcoming" : "Pending");
 
@@ -52,6 +55,13 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
 
+        pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                SingletonAirbender.getInstance(getContext()).getTickets(getContext(), getArguments().getInt(ARG_OBJECT));
+                pullToRefresh.setRefreshing(false);
+            }
+        });
         return view;
     }
 

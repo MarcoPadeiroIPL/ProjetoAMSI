@@ -104,6 +104,41 @@ public class SingletonAirbender {
         this.ticketListener = ticketListener;
     }
 
+    public void updateUserData(final Context context) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+        } else {
+            StringRequest req = new StringRequest(Request.Method.GET, makeURL(getServer(context), "user", getToken(context)), new Response.Listener<String>() {
+                // Sucesso
+                @Override
+                public void onResponse(String response) {
+                    loginListener.updateUserData(JsonParser.parseJsonUpdateUserData(response));
+                }
+            },
+                    // erro
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            try {
+                                if (error.networkResponse.statusCode == 500) {
+                                    Toast.makeText(context, "Server error", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                if (error.networkResponse.statusCode == 403) {
+                                    Toast.makeText(context, "Wrong credentials", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+                            } catch (Exception ex) {
+                                Toast.makeText(context, "Server not found", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+            );
+            requestQueue.add(req);
+        }
+
+    }
     public void loginAPI(final Context context, String username, String password) {
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
@@ -319,9 +354,10 @@ public class SingletonAirbender {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         if (error.networkResponse.statusCode == 404) {
-                            return;
+                            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "There are no tickets", Snackbar.LENGTH_SHORT).show();
                         }
-                        Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(co, error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
                     }
                 }
         );

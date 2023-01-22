@@ -8,21 +8,17 @@ public class User {
     private String birthdate;
     private String phone;
     private String nif;
-    private enum gender {M,F};
-    private String accCreationDate;
-    private boolean application;
+    private String gender;
     private double balance;
 
 
-    public User(String username, String fName, String surname, String birthdate, String phone, String nif, String accCreationDate, boolean application, double balance) {
+    public User(String username, String fName, String surname, String birthdate, String phone, String nif, String gender, double balance) {
         this.username = username;
         this.fName = fName;
         this.surname = surname;
-        this.birthdate = birthdate;
         this.phone = phone;
         this.nif = nif;
-        this.accCreationDate = accCreationDate;
-        this.application = application;
+        this.gender = gender;
         this.balance = balance;
     }
     public int getId() {
@@ -77,20 +73,12 @@ public class User {
         this.nif = nif;
     }
 
-    public String getAccCreationDate() {
-        return accCreationDate;
+    public String getGender() {
+        return gender;
     }
 
-    public void setAccCreationDate(String accCreationDate) {
-        this.accCreationDate = accCreationDate;
-    }
-
-    public boolean isApplication() {
-        return application;
-    }
-
-    public void setApplication(boolean application) {
-        this.application = application;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public double getBalance() {

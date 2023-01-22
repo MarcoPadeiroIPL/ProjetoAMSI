@@ -86,6 +86,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 "receipt_id INTEGER NOT NULL, " +
                 "tariff_id INTEGER NOT NULL, " +
                 "tariffType VARCHAR NOT NULL, " +
+                "type VARCHAR NOT NULL, " +
                 "FOREIGN KEY (flight_id) REFERENCES flightsTickets(id) " +
                 ");";
         db.execSQL(tickets);

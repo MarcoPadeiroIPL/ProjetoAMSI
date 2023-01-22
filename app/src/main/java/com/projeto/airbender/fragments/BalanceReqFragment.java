@@ -24,6 +24,8 @@ import com.projeto.airbender.R;
 import java.util.ArrayList;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.projeto.airbender.adapters.BalanceReqAdapter;
 import com.projeto.airbender.listeners.BalanceReqListener;
 import com.projeto.airbender.models.BalanceReq;
@@ -33,6 +35,7 @@ import com.projeto.airbender.utils.JsonParser;
 public class BalanceReqFragment extends Fragment implements BalanceReqListener {
     private RecyclerView recyclerView;
     private FloatingActionButton fabAddBalanceReq;
+    private SwipeRefreshLayout pullToRefresh;
 
     public BalanceReqFragment() {
         // Required empty public constructor
@@ -42,7 +45,9 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_balance_req, container, false);
 
+        pullToRefresh = view.findViewById(R.id.pullToRefresh);
         recyclerView = view.findViewById(R.id.recyclerView);
+        fabAddBalanceReq = view.findViewById(R.id.fabAddBalanceReq);
 
         SingletonAirbender.getInstance(getContext()).setBalanceReqListener(this);
 
@@ -51,7 +56,15 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
 
-        fabAddBalanceReq = view.findViewById(R.id.fabAddBalanceReq);
+
+        pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                SingletonAirbender.getInstance(getContext()).getAllBalanceReqs(getContext());
+                pullToRefresh.setRefreshing(false);
+            }
+        });
+
         fabAddBalanceReq.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

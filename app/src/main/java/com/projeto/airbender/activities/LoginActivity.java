@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.projeto.airbender.R;
@@ -30,24 +31,27 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        checkIfLoggedIn();
+        SingletonAirbender.getInstance(getApplicationContext()).setLoginListener(this);
+        if(!isLoggedIn()){
+            setContentView(R.layout.activity_login);
+            replaceFragment(new LoginFragment(), false);
+        }
         defineServer();
 
-        setContentView(R.layout.activity_login);
 
-        replaceFragment(new LoginFragment(), false);
 
-        SingletonAirbender.getInstance(getApplicationContext()).setLoginListener(this);
     }
-    public void checkIfLoggedIn() {
+    public boolean isLoggedIn() {
         // save on shared prefenrences
         SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
+        if(!sharedInfoUser.contains("TOKEN"))
+            return false;
 
-        if (sharedInfoUser.contains("TOKEN")) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
+        SingletonAirbender.getInstance(getApplicationContext()).updateUserData(getApplicationContext());
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
+        return true;
     }
 
     public void replaceFragment(Fragment newFragment, boolean keepBack) {
@@ -73,6 +77,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         SharedPreferences.Editor editor = sharedInfoUser.edit();
         editor.putString("ROLE", map.get("role"));
         editor.putString("TOKEN", map.get("token"));
+        editor.putString("USERNAME", map.get("username"));
         editor.putString("FNAME", map.get("fName"));
         editor.putString("SURNAME", map.get("surname"));
         editor.putString("PHONE", map.get("phone"));
@@ -83,6 +88,22 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
+
+    }
+    @Override
+    public void updateUserData(Map<String, String> map) {
+        // save on shared prefenrences
+        SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedInfoUser.edit();
+        editor.putString("FNAME", map.get("fName"));
+        editor.putString("USERNAME", map.get("username"));
+        editor.putString("SURNAME", map.get("surname"));
+        editor.putString("PHONE", map.get("phone"));
+        editor.putString("NIF", map.get("nif"));
+        editor.putFloat("BALANCE", Float.parseFloat(map.get("balance")));
+        editor.apply();
+
 
     }
     public void defineServer(){
