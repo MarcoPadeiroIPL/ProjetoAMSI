@@ -45,16 +45,21 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
         tvTitle = view.findViewById(R.id.tvTitle);
         pullToRefresh = view.findViewById(R.id.pullToRefresh);
 
-        tvTitle.setText(getArguments().getInt(ARG_OBJECT) == 0 ? "Upcoming" : "Pending");
+        tvTitle.setText(getArguments().getInt(ARG_OBJECT) == 0 ? "Upcoming" : getArguments().getInt(ARG_OBJECT) == 1 ? "Pending" : "Past");
 
         recyclerView.setAdapter(new TicketAdapter(new ArrayList<>(), this));
 
-        if(getArguments().getInt(ARG_OBJECT) == 0) {
-            SingletonAirbender.getInstance(getContext()).setTicketUpcomingListener(this);
-        } else {
-            SingletonAirbender.getInstance(getContext()).setTicketPendingListener(this);
+        switch (getArguments().getInt(ARG_OBJECT)) {
+            case 0:
+                SingletonAirbender.getInstance(getContext()).setTicketUpcomingListener(this);
+                break;
+            case 1:
+                SingletonAirbender.getInstance(getContext()).setTicketPendingListener(this);
+                break;
+            case 2:
+                SingletonAirbender.getInstance(getContext()).setTicketPastListener(this);
+                break;
         }
-
         SingletonAirbender.getInstance(getContext()).getTickets(getContext(), getArguments().getInt(ARG_OBJECT));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));

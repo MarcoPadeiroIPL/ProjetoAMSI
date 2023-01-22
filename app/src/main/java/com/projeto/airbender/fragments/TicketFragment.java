@@ -44,7 +44,7 @@ public class TicketFragment extends Fragment {
         viewPager = view.findViewById(R.id.pager);
         tabLayout = view.findViewById(R.id.tab_layout);
 
-        String tabTitles[] = new String[]{"Upcoming", "Pending"};
+        String tabTitles[] = new String[]{"Upcoming", "Pending", "Past"};
         viewPager.setAdapter(ticketViewAdapter);
         viewPager.setPageTransformer(new DepthPageTransformer());
         new TabLayoutMediator(tabLayout, viewPager,

@@ -19,6 +19,15 @@ public class BalanceReqAdapter extends RecyclerView.Adapter<BalanceReqAdapter.Vi
 
     private ArrayList<BalanceReq> localDataSet;
 
+    public void removeItem(int adapterPosition) {
+        localDataSet.remove(adapterPosition);
+        notifyItemRemoved(adapterPosition);
+    }
+
+    public BalanceReq getBalanceReq(int adapterPosition) {
+        return localDataSet.get(adapterPosition);
+    }
+
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder)

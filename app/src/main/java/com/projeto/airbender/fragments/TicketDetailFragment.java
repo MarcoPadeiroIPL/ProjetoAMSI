@@ -49,6 +49,9 @@ public class TicketDetailFragment extends Fragment {
         loadTicket(view);
 
 
+        if(position != 0)
+            fabCheckin.setVisibility(View.GONE);
+
         fabCheckin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

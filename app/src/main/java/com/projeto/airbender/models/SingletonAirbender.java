@@ -55,6 +55,7 @@ public class SingletonAirbender {
     private BalanceReqListener balanceReqListener;
     private TicketListener ticketUpcomingListener;
     private TicketListener ticketPendingListener;
+    private TicketListener ticketPastListener;
 
     private ContentValuesHelper contentValuesHelper;
 
@@ -107,6 +108,10 @@ public class SingletonAirbender {
 
     public void setTicketUpcomingListener(TicketListener ticketListener) {
         this.ticketUpcomingListener = ticketListener;
+    }
+
+    public void setTicketPastListener(TicketListener ticketListener) {
+        this.ticketPastListener = ticketListener;
     }
 
     public void updateUserData(final Context context) {
@@ -376,24 +381,20 @@ public class SingletonAirbender {
                     dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket(), path));
                 }
                 if (type == UPCOMING) {
-                    if (ticketUpcomingListener != null) {
+                    if (ticketUpcomingListener != null)
                         ticketUpcomingListener.onRefreshTicketList(tickets);
-                    }
                 } else if (type == PENDING) {
-                    if (ticketPendingListener != null) {
+                    if (ticketPendingListener != null)
                         ticketPendingListener.onRefreshTicketList(tickets);
-                    }
+                } else {
+                    if (ticketPastListener != null)
+                        ticketPastListener.onRefreshTicketList(tickets);
                 }
             }
         },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (error.networkResponse.statusCode == 404) {
-                            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "There are no tickets", Snackbar.LENGTH_SHORT).show();
-                        }
-                        //Toast.makeText(co, error.getMessage(), Toast.LENGTH_SHORT).show();
-                        Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -424,6 +425,35 @@ public class SingletonAirbender {
         );
         requestQueue.add(req);
         return balanceReqs;
+    }
+
+    public boolean deleteBalanceReq(Context context, BalanceReq balanceReq) {
+        final boolean[] success = {false};
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+        } else {
+            StringRequest req = new StringRequest(Request.Method.DELETE, makeURL(getServer(context), "balance-req/" + balanceReq.getId(), getToken(context)), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    dbHelper.deleteID("balanceReq", balanceReq.getId());
+                    if (balanceReqListener != null)
+                        balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
+                    success[0] = true;
+                }
+            },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            if(error.networkResponse.statusCode == 403) {
+                                Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Cannot delete decided balance requests", Snackbar.LENGTH_SHORT).show();
+                            }
+                            success[0] = false;
+                        }
+                    }
+            );
+            requestQueue.add(req);
+        }
+        return success[0];
     }
 
     /*public void removerLivroAPI(final Livro livro, final Context context){

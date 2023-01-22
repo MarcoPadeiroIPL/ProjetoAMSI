@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -22,6 +24,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -36,6 +39,7 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
     private RecyclerView recyclerView;
     private FloatingActionButton fabAddBalanceReq;
     private SwipeRefreshLayout pullToRefresh;
+    private BalanceReqAdapter balanceReqAdapter;
 
     public BalanceReqFragment() {
         // Required empty public constructor
@@ -51,11 +55,48 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
 
         SingletonAirbender.getInstance(getContext()).setBalanceReqListener(this);
 
-        recyclerView.setAdapter(new BalanceReqAdapter(new ArrayList<BalanceReq>()));
+        balanceReqAdapter = new BalanceReqAdapter(new ArrayList<BalanceReq>());
+
+        recyclerView.setAdapter(balanceReqAdapter);
+
         SingletonAirbender.getInstance(getContext()).getAllBalanceReqs(getContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
 
+        ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                if (!Objects.equals(balanceReqAdapter.getBalanceReq(viewHolder.getAdapterPosition()).getStatus(), "Ongoing")) {
+                    Snackbar.make(view, "You can't delete a balance request that is not ongoing", Snackbar.LENGTH_LONG).show();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Are you sure?");
+                    builder.setMessage("This action cannot be undone.");
+                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Perform the action
+                            if (SingletonAirbender.getInstance(getContext()).deleteBalanceReq(getContext(), balanceReqAdapter.getBalanceReq(viewHolder.getAdapterPosition())))
+                                Snackbar.make(view, "Deleted successfully", Snackbar.LENGTH_LONG).show();
+                        }
+                    });
+                    builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.show();
+                }
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -68,7 +109,7 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
         fabAddBalanceReq.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!JsonParser.isConnectionInternet(getContext())) {
+                if (!JsonParser.isConnectionInternet(getContext())) {
                     Snackbar.make(view, "No internet connection", Snackbar.LENGTH_SHORT).show();
                     return;
                 }
@@ -104,6 +145,7 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener {
 
     @Override
     public void onRefreshBalanceReqList(ArrayList<BalanceReq> balanceReqs) {
-        recyclerView.setAdapter(new BalanceReqAdapter(balanceReqs));
+        balanceReqAdapter = new BalanceReqAdapter(balanceReqs);
+        recyclerView.setAdapter(balanceReqAdapter);
     }
 }

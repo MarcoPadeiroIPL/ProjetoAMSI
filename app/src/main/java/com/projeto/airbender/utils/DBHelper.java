@@ -108,6 +108,10 @@ public class DBHelper extends SQLiteOpenHelper {
         return db.delete(table, column + " = " + "'" + value + "'", null) == 1;
     }
 
+    public boolean deleteID(String table, int id) {
+        return db.delete(table, "id = " + id , null) == 1;
+    }
+
     public void deleteAllDB(String table) {
         db.delete(table, null, null);
     }
