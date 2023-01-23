@@ -8,20 +8,15 @@ import androidx.fragment.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.projeto.airbender.R;
-import com.projeto.airbender.fragments.HomeFragment;
 import com.projeto.airbender.fragments.LoginFragment;
-import com.projeto.airbender.fragments.SettingsFragment;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.models.SingletonAirbender;
 
 import java.util.Map;
-import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity implements LoginListener {
 
@@ -48,8 +43,13 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         if(!sharedInfoUser.contains("TOKEN"))
             return false;
 
-        SingletonAirbender.getInstance(getApplicationContext()).updateUserData(getApplicationContext());
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent;
+        if(sharedInfoUser.getString("ROLE", "client").equals("client")){
+            SingletonAirbender.getInstance(getApplicationContext()).getUserData(getApplicationContext());
+            intent = new Intent(this, MainActivity.class);
+        } else {
+            intent = new Intent(this, AdminActivity.class);
+        }
         startActivity(intent);
         finish();
         return true;
@@ -76,7 +76,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedInfoUser.edit();
-        editor.putInt("ID", Integer.parseInt(Objects.requireNonNull(map.get("id"))));
+        editor.putInt("ID", Integer.parseInt(map.get("id")));
         editor.putString("ROLE", map.get("role"));
         editor.putString("TOKEN", map.get("token"));
         editor.putString("USERNAME", map.get("username"));
@@ -88,6 +88,9 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         editor.apply();
 
         Intent intent = new Intent(this, MainActivity.class);
+        if(!map.get("role").equals("client")){
+            intent = new Intent(this, AdminActivity.class);
+        }
         startActivity(intent);
         finish();
 

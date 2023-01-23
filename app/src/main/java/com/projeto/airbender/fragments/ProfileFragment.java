@@ -15,14 +15,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 import com.projeto.airbender.activities.LoginActivity;
-import com.projeto.airbender.activities.MainActivity;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.models.SingletonAirbender;
-import com.projeto.airbender.utils.DBHelper;
-import com.projeto.airbender.utils.JsonParser;
 
 import java.util.Map;
 
@@ -46,7 +42,7 @@ public class ProfileFragment extends Fragment implements LoginListener {
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                SingletonAirbender.getInstance(getContext()).updateUserData(getContext());
+                SingletonAirbender.getInstance(getContext()).getUserData(getContext());
                 pullToRefresh.setRefreshing(false);
             }
         });
@@ -58,8 +54,6 @@ public class ProfileFragment extends Fragment implements LoginListener {
                 SharedPreferences.Editor editor = sharedInfoUser.edit();
                 editor.clear();
                 editor.apply();
-                DBHelper dbHelper = new DBHelper(getContext());
-                dbHelper.deleteAllDB("balanceReq");
 
                 Intent intent = new Intent(getContext(), LoginActivity.class);
                 startActivity(intent);

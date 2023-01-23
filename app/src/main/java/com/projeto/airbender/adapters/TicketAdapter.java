@@ -50,7 +50,6 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
                 ticketListener.onItemClicked(localDataSet.get(position));
             }
         });
-
     }
 
     // Return the size of your dataset (invoked by the layout manager)

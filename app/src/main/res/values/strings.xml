@@ -33,4 +33,8 @@
     <string name="gender">Gender</string>
     <string name="balance">Balance</string>
     <string name="edit_profile">Edit Profile</string>
+    <string name="txt_fname">First Name</string>
+    <string name="txt_surname">Surname</string>
+    <string name="txt_phone">Phone</string>
+    <string name="txt_nif">NIF</string>
 </resources>

@@ -3,11 +3,8 @@ package com.projeto.airbender.models;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.view.View;
 import android.widget.Toast;
 
-import java.security.Timestamp;
-import java.util.Arrays;
 import java.util.Base64;
 
 import com.android.volley.Request;
@@ -19,7 +16,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.snackbar.Snackbar;
-import com.projeto.airbender.activities.LoginActivity;
+import com.projeto.airbender.activities.AdminActivity;
 import com.projeto.airbender.listeners.BalanceReqListener;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.listeners.TicketListener;
@@ -27,12 +24,6 @@ import com.projeto.airbender.utils.ContentValuesHelper;
 import com.projeto.airbender.utils.DBHelper;
 import com.projeto.airbender.utils.JsonParser;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -115,7 +106,7 @@ public class SingletonAirbender {
         this.ticketPastListener = ticketListener;
     }
 
-    public void updateUserData(final Context context) {
+    public void getUserData(final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
             return;
         } else {
@@ -248,31 +239,41 @@ public class SingletonAirbender {
         return false;
     }
 
-    public void replaceAirportToUpcoming(Airport airport) {
+    public void replaceAirportToType(Airport airport, String type) {
         ArrayList<Airport> airports = dbHelper.getAllAirports();
         for (Airport a : airports) {
-            if (a.getId() == airport.getId() && !Objects.equals(a.getType(), "upcoming")) {
-                dbHelper.updateDB("airports", contentValuesHelper.getAirport(airport, "upcoming"));
+            if (a.getId() == airport.getId() && !Objects.equals(a.getType(), type)) {
+                dbHelper.updateDB("airports", contentValuesHelper.getAirport(airport, type));
             }
         }
     }
 
-    public void replaceFlightToUpcoming(Flight flight) {
+    public void replaceFlightToType(Flight flight, String type) {
         ArrayList<Flight> flights = dbHelper.getAllFlights();
         for (Flight f : flights) {
-            if (f.getId() == flight.getId() && !Objects.equals(f.getType(), "upcoming")) {
-                dbHelper.updateDB("flights", contentValuesHelper.getFlight(flight, "upcoming"));
+            if (f.getId() == flight.getId() && !Objects.equals(f.getType(), type)) {
+                dbHelper.updateDB("flights", contentValuesHelper.getFlight(flight, type));
             }
         }
     }
 
-    public void replaceTicketToUpcoming(Ticket ticket) {
+
+    public void replaceTicketToType(Ticket ticket, String type) {
         ArrayList<Ticket> tickets = dbHelper.getAllTickets();
         for (Ticket t : tickets) {
-            if (t.getId() == ticket.getId() && !Objects.equals(t.getType(), "upcoming")) {
-                dbHelper.updateDB("flights", contentValuesHelper.getTicket(ticket, "upcoming"));
+            if (t.getId() == ticket.getId() && !Objects.equals(t.getType(), type)) {
+                dbHelper.updateDB("tickets", contentValuesHelper.getTicket(ticket, type));
             }
         }
+    }
+
+    public boolean flightExists(Flight flight) {
+        ArrayList<Flight> flights = dbHelper.getAllFlights();
+        for (Flight f : flights) {
+            if (f.getId() == flight.getId())
+                return true;
+        }
+        return false;
     }
 
     public boolean ticketExists(Ticket ticket) {
@@ -283,22 +284,14 @@ public class SingletonAirbender {
         }
         return false;
     }
-    public boolean flightExists(Flight flight) {
-        ArrayList<Flight> flights = dbHelper.getAllFlights();
-        for (Flight f : flights) {
-            if (f.getId() == flight.getId())
-                return true;
-        }
-        return false;
-    }
 
     public void getTicketsFromDB(int position) {
         final int UPCOMING = 0, PENDING = 1, PAST = 2;
         String type = position == UPCOMING ? "upcoming" : position == PENDING ? "pending" : "past";
         ArrayList<TicketInfo> ticketInfo = new ArrayList<TicketInfo>();
         ArrayList<Ticket> tickets = dbHelper.getTickets("type", type);
-        ArrayList<Flight> flights = dbHelper.getFlights("type", type);
-        ArrayList<Airport> airports = dbHelper.getAirports("type", type);
+        ArrayList<Flight> flights = dbHelper.getAllFlights();
+        ArrayList<Airport> airports = dbHelper.getAllAirports();
         for (Ticket ticket : tickets) {
             Flight flight = findFlight(flights, ticket.getFlight_id());
             Airport airportArrival = findAirport(airports, flight.getAirportArrival());
@@ -306,11 +299,19 @@ public class SingletonAirbender {
 
             ticketInfo.add(new TicketInfo(ticket, airportDeparture, airportArrival, flight));
         }
-        if (ticketUpcomingListener != null)
-            ticketUpcomingListener.onRefreshTicketList(ticketInfo);
+        if (position == UPCOMING) {
+            if (ticketUpcomingListener != null)
+                ticketUpcomingListener.onRefreshTicketList(ticketInfo);
+        } else if (position == PENDING) {
+            if (ticketPendingListener != null)
+                ticketPendingListener.onRefreshTicketList(ticketInfo);
+        } else {
+            if (ticketPastListener != null)
+                ticketPastListener.onRefreshTicketList(ticketInfo);
+        }
     }
-
     public void requestTicketsAPI(final Context context, int position) {
+        System.out.println("requestTicketsAPI");
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
             return;
@@ -321,39 +322,30 @@ public class SingletonAirbender {
             @Override
             public void onResponse(JSONArray response) {
                 tickets = JsonParser.parseTickets(response);
-                //dbHelper.deleteDB("tickets", "type", path);
-                dbHelper.deleteDB("airports", "type", path);
-                dbHelper.deleteDB("flights", "type", path);
                 dbHelper.deleteDB("tickets", "type", path);
 
                 for (TicketInfo ticket : tickets) {
                     if (!airportExists(ticket.getAirportArrival()))
                         dbHelper.insertDB("airports", contentValuesHelper.getAirport(ticket.getAirportArrival(), path));
                     else
-                        replaceAirportToUpcoming(ticket.getAirportArrival());
+                        replaceAirportToType(ticket.getAirportArrival(), path);
                     if (!airportExists(ticket.getAirportDeparture()))
                         dbHelper.insertDB("airports", contentValuesHelper.getAirport(ticket.getAirportDeparture(), path));
                     else
-                        replaceAirportToUpcoming(ticket.getAirportArrival());
+                        replaceAirportToType(ticket.getAirportArrival(), path);
                     if (!flightExists(ticket.getFlight()))
                         dbHelper.insertDB("flights", contentValuesHelper.getFlight(ticket.getFlight(), path));
                     else
-                        replaceFlightToUpcoming(ticket.getFlight());
-                    if(!ticketExists(ticket.getTicket()))
+                        replaceFlightToType(ticket.getFlight(), path);
+                    if (!ticketExists(ticket.getTicket()))
                         dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket(), path));
                     else
-                        replaceTicketToUpcoming(ticket.getTicket());
+                        replaceTicketToType(ticket.getTicket(), path);
                 }
-                if (position == UPCOMING) {
-                    if (ticketUpcomingListener != null)
-                        ticketUpcomingListener.onRefreshTicketList(tickets);
-                } else if (position == PENDING) {
-                    if (ticketPendingListener != null)
-                        ticketPendingListener.onRefreshTicketList(tickets);
-                } else {
-                    if (ticketPastListener != null)
-                        ticketPastListener.onRefreshTicketList(tickets);
-                }
+                dbHelper.printTableData("tickets");
+                dbHelper.printTableData("flights");
+                dbHelper.printTableData("airports");
+                getTicketsFromDB(position);
             }
         },
                 new Response.ErrorListener() {
@@ -462,6 +454,66 @@ public class SingletonAirbender {
             requestQueue.add(req);
         }
         return success[0];
+    }
+
+    public void checkIn(Context context, String ticket) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((AdminActivity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+        } else {
+            StringRequest req = new StringRequest(Request.Method.PUT, makeURL(getServer(context), "tickets/checkin/" + ticket, getToken(context)), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Snackbar.make(((AdminActivity) context).findViewById(android.R.id.content), "Checked in successfully!", Snackbar.LENGTH_SHORT).show();
+                }
+            },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            //Snackbar.make(((AdminActivity) context).findViewById(android.R.id.content), "Cannot checkin", Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+            requestQueue.add(req);
+        }
+    }
+
+    public void updateUser(Context context, String fname, String surname, String nif, String phone) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+        } else {
+            try {
+                JSONObject jsonBody = new JSONObject();
+                jsonBody.put("fName", fname);
+                jsonBody.put("surname", surname);
+                jsonBody.put("nif", nif);
+                jsonBody.put("phone", phone);
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, makeURL(getServer(context), "user/change", getToken(context)), jsonBody,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                getUserData(context);
+                                Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Updated successfully!", Snackbar.LENGTH_SHORT).show();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Snackbar.make(((Activity) context).findViewById(android.R.id.content), "There was an error while trying to update!", Snackbar.LENGTH_SHORT).show();
+                    }
+                }
+
+                ) {
+                    @Override
+                    public Map<String, String> getHeaders() {
+                        HashMap<String, String> headers = new HashMap<String, String>();
+                        headers.put("Content-Type", "application/json; charset=utf-8");
+                        return headers;
+                    }
+                };
+                requestQueue.add(jsonObjectRequest);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /*public void removerLivroAPI(final Livro livro, final Context context){
