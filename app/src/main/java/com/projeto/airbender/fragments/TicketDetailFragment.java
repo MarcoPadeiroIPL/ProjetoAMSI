@@ -16,8 +16,10 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 import com.projeto.airbender.activities.MainActivity;
+import com.projeto.airbender.models.SingletonAirbender;
 import com.projeto.airbender.models.TicketInfo;
 
 import java.util.Objects;
@@ -25,7 +27,7 @@ import java.util.Objects;
 public class TicketDetailFragment extends Fragment {
 
     private final TicketInfo ticketInfo;
-    private ExtendedFloatingActionButton fabCheckin;
+    private ExtendedFloatingActionButton fabCheckin, fabPay;
     private FloatingActionButton fabBack;
     private MainActivity activity;
     private TextView tvAirportDeparture, tvAirportArrival, tvDate;
@@ -43,6 +45,7 @@ public class TicketDetailFragment extends Fragment {
 
 
         fabCheckin = view.findViewById(R.id.fabCheckIn);
+        fabPay = view.findViewById(R.id.fabPay);
         fabBack = view.findViewById(R.id.fabBack);
         activity = (MainActivity) getActivity();
 
@@ -51,7 +54,26 @@ public class TicketDetailFragment extends Fragment {
 
         if(position != 0)
             fabCheckin.setVisibility(View.GONE);
+        if(position != 1)
+            fabPay.setVisibility(View.GONE);
 
+        fabPay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SingletonAirbender.getInstance(getContext()).payTicket(getContext(), ticketInfo.getTicket().getId());
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.setCustomAnimations(
+                        R.anim.slide_in,  // enter
+                        R.anim.fade_out,  // exit
+                        R.anim.fade_in,   // popEnter
+                        R.anim.slide_out  // popExit
+                );
+                fragmentTransaction.replace(R.id.frameLayout, new TicketFragment());
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+        });
         fabCheckin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

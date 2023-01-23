@@ -312,6 +312,7 @@ public class SingletonAirbender {
                 ticketPastListener.onRefreshTicketList(ticketInfo);
         }
     }
+
     public void requestTicketsAPI(final Context context, int position) {
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
@@ -361,7 +362,7 @@ public class SingletonAirbender {
     }
 
     public void getAllAirportsDB(final Context context) {
-        if (airportListener!= null)
+        if (airportListener != null)
             airportListener.onRefreshAirports(dbHelper.getAllAirports());
     }
 
@@ -411,7 +412,7 @@ public class SingletonAirbender {
                     airports = JsonParser.parseAirports(response);
                     dbHelper.deleteDB("airports", "type", "buy");
                     for (Airport airport : airports) {
-                        if(!airportExists(airport))
+                        if (!airportExists(airport))
                             dbHelper.insertDB("airports", contentValuesHelper.getAirport(airport, "buy"));
                     }
                     if (airportListener != null)
@@ -434,7 +435,7 @@ public class SingletonAirbender {
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
         } else {
-            String mpath ="flights/" + dbHelper.getAirports("city", airportDeparture).get(0).getId()  + "/" + dbHelper.getAirports("city", airportArrival).get(0).getId() + "/" + departureDate;
+            String mpath = "flights/" + dbHelper.getAirports("city", airportDeparture).get(0).getId() + "/" + dbHelper.getAirports("city", airportArrival).get(0).getId() + "/" + departureDate;
             StringRequest req = new StringRequest(Request.Method.GET, makeURL(getServer(context), mpath, getToken(context)), new Response.Listener<String>() {
                 // Sucesso
                 @Override
@@ -468,6 +469,7 @@ public class SingletonAirbender {
         }
         return flight;
     }
+
     public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
@@ -585,6 +587,53 @@ public class SingletonAirbender {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void payTicket(Context context, int id) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+        } else {
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, makeURL(getServer(context), "tickets/pay/" + id, getToken(context)), null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            requestTicketsAPI(context, 1);
+                            requestTicketsAPI(context, 0);
+                            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Payed successfully!", Snackbar.LENGTH_SHORT).show();
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Snackbar.make(((Activity) context).findViewById(android.R.id.content), "There was an error while trying to pay!", Snackbar.LENGTH_SHORT).show();
+                }
+            });
+            requestQueue.add(jsonObjectRequest);
+        }
+    }
+
+    public void deleteTicket(Context context, Ticket ticket) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+            getTicketsFromDB(1);
+        } else {
+            StringRequest req = new StringRequest(Request.Method.DELETE, makeURL(getServer(context), "tickets/" + ticket.getId(), getToken(context)), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    dbHelper.deleteID("tickets", ticket.getId());
+                    Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Deleted Sucessfully", Snackbar.LENGTH_SHORT).show();
+                    getTicketsFromDB(1);
+                }
+            },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            getTicketsFromDB(1);
+                            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Cannot delete tickets", Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+            requestQueue.add(req);
         }
     }
 }

@@ -48,4 +48,5 @@
     <string name="economicPrice">Economic Price</string>
     <string name="normalPrice">Normal Price</string>
     <string name="luxuryPrice">Luxury Price</string>
+    <string name="txt_pay">Pay</string>
 </resources>

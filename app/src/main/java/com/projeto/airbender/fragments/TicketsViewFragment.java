@@ -1,6 +1,8 @@
 package com.projeto.airbender.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -67,6 +70,38 @@ public class TicketsViewFragment extends Fragment implements TicketListener {
             SingletonAirbender.getInstance(getContext()).getTicketsFromDB(getArguments().getInt(ARG_OBJECT));
         else
             SingletonAirbender.getInstance(getContext()).requestTicketsAPI(getContext(), getArguments().getInt(ARG_OBJECT));
+
+        ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Are you sure?");
+                builder.setMessage("This action cannot be undone.");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Perform the action
+                        SingletonAirbender.getInstance(getContext()).deleteTicket(getContext(), ticketAdapter.getTicket(viewHolder.getAdapterPosition()));
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SingletonAirbender.getInstance(getContext()).getTicketsFromDB(1);
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        if(getArguments().getInt(ARG_OBJECT) == 1)
+            itemTouchHelper.attachToRecyclerView(recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
 

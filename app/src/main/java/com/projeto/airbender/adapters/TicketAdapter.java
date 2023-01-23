@@ -23,6 +23,14 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
     private final ArrayList<TicketInfo> localDataSet;
     private final TicketListener ticketListener;
 
+    public void removeItem(int adapterPosition) {
+        localDataSet.remove(adapterPosition);
+        notifyItemRemoved(adapterPosition);
+    }
+
+    public Ticket getTicket(int adapterPosition) {
+        return localDataSet.get(adapterPosition).getTicket();
+    }
 
     public TicketAdapter(ArrayList<TicketInfo> dataSet, TicketListener ticketListener) {
         localDataSet = dataSet;
