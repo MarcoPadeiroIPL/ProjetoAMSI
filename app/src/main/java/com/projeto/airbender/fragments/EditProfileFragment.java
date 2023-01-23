@@ -36,7 +36,7 @@ public class EditProfileFragment extends Fragment {
         fabBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity) getActivity()).onBackPressed();
+                getActivity().onBackPressed();
             }
         });
         btnSaveUser.setOnClickListener(new View.OnClickListener() {
@@ -44,7 +44,7 @@ public class EditProfileFragment extends Fragment {
             public void onClick(View v) {
                 if(validateFields()) {
                     SingletonAirbender.getInstance(getContext()).updateUser(getContext(), fname, surname, nif, phone);
-                    ((MainActivity) getActivity()).onBackPressed();
+                    getActivity().onBackPressed();
                 }
             }
         });

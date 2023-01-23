@@ -188,6 +188,8 @@ public class JsonParser {
         Flight flight = null;
         Airplane airplane = null;
         Tariff tariff = null;
+        Airport airportArrival = null;
+        Airport airportDeparture = null;
         FlightInfo flightInfo = null;
         try {
             JSONObject json = new JSONObject(response);
@@ -203,7 +205,16 @@ public class JsonParser {
                      jsonTariff = temp.getJSONObject(i);
             }
             tariff = new Tariff(jsonTariff.optInt("id"), jsonTariff.getString("startDate"), jsonTariff.optDouble("economicPrice"), jsonTariff.optDouble("normalPrice"), jsonTariff.optDouble("luxuryPrice"), jsonTariff.optInt("flight_id"), jsonTariff.optBoolean("active"));
-            flightInfo = new FlightInfo(flight, tariff, airplane);
+
+            JSONObject jsonAirportArrival = json.getJSONObject("airportArrival");
+            airportArrival = new Airport(jsonAirportArrival.optInt("id"), jsonAirportArrival.optString("country"), jsonAirportArrival.optString("code"),
+                    jsonAirportArrival.optString("city"), jsonAirportArrival.optInt("search"), jsonAirportArrival.optString("status"), "a");
+
+            JSONObject jsonAirportDeparture = json.getJSONObject("airportDeparture");
+            airportDeparture = new Airport(jsonAirportDeparture.optInt("id"), jsonAirportDeparture.optString("country"), jsonAirportDeparture.optString("code"),
+                    jsonAirportDeparture.optString("city"), jsonAirportDeparture.optInt("search"), jsonAirportDeparture.optString("status"), "a");
+
+            flightInfo = new FlightInfo(flight, tariff, airplane, airportDeparture, airportArrival);
         } catch (JSONException e) {
             e.printStackTrace();
         }

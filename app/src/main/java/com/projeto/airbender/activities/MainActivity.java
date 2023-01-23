@@ -39,9 +39,9 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences settings = getApplicationContext().getSharedPreferences("settings", 0);
         if(settings.getBoolean("FIRSTLOGIN", true)) {
-            System.out.println("FIRST LOGIN");
             SingletonAirbender.getInstance(getApplicationContext()).requestTicketsAPI(getApplicationContext(), 0);
             SingletonAirbender.getInstance(getApplicationContext()).requestBalanceReqsAPI(getApplicationContext());
+            SingletonAirbender.getInstance(getApplicationContext()).requestAirportsAPI(getApplicationContext());
             settings.edit().putBoolean("FIRSTLOGIN", false).apply();
         }
 
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                         SingletonAirbender.getInstance(getApplicationContext()).requestTicketsAPI(getApplicationContext(), 2);
                     }
                     if(topic.equals("airport")) {
-                        //SingletonAirbender.getInstance(getApplicationContext()).requestAirportsAPI(getApplicationContext(), 1);
+                        SingletonAirbender.getInstance(getApplicationContext()).requestAirportsAPI(getApplicationContext());
                     }
 
                     if(topic.equals("config")) {

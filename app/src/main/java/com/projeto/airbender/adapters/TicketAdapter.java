@@ -20,8 +20,8 @@ import java.util.ArrayList;
 
 public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder> {
 
-    private ArrayList<TicketInfo> localDataSet;
-    private TicketListener ticketListener;
+    private final ArrayList<TicketInfo> localDataSet;
+    private final TicketListener ticketListener;
 
 
     public TicketAdapter(ArrayList<TicketInfo> dataSet, TicketListener ticketListener) {
@@ -66,10 +66,10 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
             super(view);
             // Define click listener for the ViewHolder's View
 
-            airportDeparture = (TextView) view.findViewById(R.id.tvAirportDeparture);
-            airportArrival = (TextView) view.findViewById(R.id.tvAirportArrival);
-            date = (TextView) view.findViewById(R.id.tvDate);
-            cardView = (CardView) view.findViewById(R.id.card_view);
+            airportDeparture = view.findViewById(R.id.tvAirportDeparture);
+            airportArrival = view.findViewById(R.id.tvAirportArrival);
+            date = view.findViewById(R.id.tvDate);
+            cardView = view.findViewById(R.id.card_view);
         }
 
         public TextView getAirportDeparture() {

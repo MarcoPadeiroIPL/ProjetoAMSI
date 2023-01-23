@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class BalanceReqAdapter extends RecyclerView.Adapter<BalanceReqAdapter.ViewHolder> {
 
-    private ArrayList<BalanceReq> localDataSet;
+    private final ArrayList<BalanceReq> localDataSet;
 
     public void removeItem(int adapterPosition) {
         localDataSet.remove(adapterPosition);
@@ -40,9 +40,9 @@ public class BalanceReqAdapter extends RecyclerView.Adapter<BalanceReqAdapter.Vi
             super(view);
             // Define click listener for the ViewHolder's View
 
-            value = (TextView) view.findViewById(R.id.tvValue);
-            status = (TextView) view.findViewById(R.id.tvStatus);
-            colorBar = (View) view.findViewById(R.id.colorBar);
+            value = view.findViewById(R.id.tvValue);
+            status = view.findViewById(R.id.tvStatus);
+            colorBar = view.findViewById(R.id.colorBar);
         }
 
         public TextView getValue() {

@@ -24,12 +24,12 @@ import java.util.Objects;
 
 public class TicketDetailFragment extends Fragment {
 
-    private TicketInfo ticketInfo;
+    private final TicketInfo ticketInfo;
     private ExtendedFloatingActionButton fabCheckin;
     private FloatingActionButton fabBack;
     private MainActivity activity;
     private TextView tvAirportDeparture, tvAirportArrival, tvDate;
-    private int position;
+    private final int position;
 
     public TicketDetailFragment(TicketInfo ticketInfo, int position) {
         this.ticketInfo = ticketInfo;
@@ -81,7 +81,7 @@ public class TicketDetailFragment extends Fragment {
     }
     private void loadTicket(View view){
         ((TextView)view.findViewById(R.id.tvAirportDeparture)).setText(ticketInfo.getAirportDeparture().getCity());
-        ((TextView)view.findViewById(R.id.tvAirportArrival)).setText(ticketInfo.getAirportArrival().getCity());;
+        ((TextView)view.findViewById(R.id.tvAirportArrival)).setText(ticketInfo.getAirportArrival().getCity());
         ((TextView)view.findViewById(R.id.tvDate)).setText(ticketInfo.getFlight().getDepartureDate());
         ((TextView)view.findViewById(R.id.tvName)).setText(String.format("%s %s", ticketInfo.getTicket().getfName(), ticketInfo.getTicket().getSurname()));
         ((TextView)view.findViewById(R.id.tvAge)).setText(String.format("%d years old", ticketInfo.getTicket().getAge()));

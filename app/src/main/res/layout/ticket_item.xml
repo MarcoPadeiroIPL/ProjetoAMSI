@@ -29,10 +29,10 @@
                 app:tint="?android:icon"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tvAirportDeparture"
-                app:layout_constraintHorizontal_bias="0.421"
+                app:layout_constraintHorizontal_bias="0.4"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.485"
+                app:layout_constraintVertical_bias="0.49"
                 app:srcCompat="@drawable/ic_baseline_airplane" />
 
             <ImageView
@@ -51,11 +51,10 @@
                 android:id="@+id/tvDate"
                 android:layout_width="159dp"
                 android:layout_height="16dp"
-                android:text="Fri 22 Jul 21:15"
                 android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.44"
+                app:layout_constraintHorizontal_bias="0.45"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.813" />
@@ -65,12 +64,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
-                android:text="Lisbon"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.092"
+                app:layout_constraintHorizontal_bias="0.01"
                 app:layout_constraintStart_toEndOf="@+id/imageView2"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.4" />
@@ -79,12 +77,11 @@
                 android:id="@+id/tvAirportDeparture"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Warsaw Chopin"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.204"
+                app:layout_constraintHorizontal_bias="0.2"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.4" />

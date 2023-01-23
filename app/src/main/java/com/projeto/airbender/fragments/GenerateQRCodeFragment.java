@@ -25,7 +25,7 @@ import com.projeto.airbender.R;
 import com.projeto.airbender.models.TicketInfo;
 
 public class GenerateQRCodeFragment extends Fragment {
-    private TicketInfo ticketInfo;
+    private final TicketInfo ticketInfo;
     private ImageButton btnBack;
 
     public GenerateQRCodeFragment(TicketInfo ticketInfo) {

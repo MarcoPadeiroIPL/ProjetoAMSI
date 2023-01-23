@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class AirportAdapter {
 
-    private ArrayList<String> localDataSet;
+    private final ArrayList<String> localDataSet;
 
     public AirportAdapter(ArrayList<String> localDataSet) {
         this.localDataSet = localDataSet;

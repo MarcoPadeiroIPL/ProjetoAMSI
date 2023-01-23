@@ -42,4 +42,10 @@
     <string name="date">Departure Date</string>
     <string name="txt_search">Search</string>
     <string name="txt_select">Select</string>
+    <string name="search_a_flight">Search for a flight</string>
+    <string name="user_information">User Information</string>
+    <string name="prices">Prices</string>
+    <string name="economicPrice">Economic Price</string>
+    <string name="normalPrice">Normal Price</string>
+    <string name="luxuryPrice">Luxury Price</string>
 </resources>

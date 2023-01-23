@@ -4,12 +4,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,22 +11,23 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
-
-import java.util.ArrayList;
-import java.util.Objects;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import com.projeto.airbender.activities.MainActivity;
 import com.projeto.airbender.adapters.BalanceReqAdapter;
 import com.projeto.airbender.listeners.BalanceReqListener;
 import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.SingletonAirbender;
 import com.projeto.airbender.utils.JsonParser;
+
+import java.util.ArrayList;
 
 public class BalanceReqFragment extends Fragment implements BalanceReqListener {
     private RecyclerView recyclerView;

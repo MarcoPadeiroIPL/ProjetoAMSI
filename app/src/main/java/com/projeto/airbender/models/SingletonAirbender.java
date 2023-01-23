@@ -39,7 +39,7 @@ import java.util.Objects;
 public class SingletonAirbender {
     private static SingletonAirbender instance = null;
     private static RequestQueue requestQueue = null;
-    private DBHelper dbHelper;
+    private final DBHelper dbHelper;
 
     private ArrayList<BalanceReq> balanceReqs;
     private ArrayList<TicketInfo> tickets;
@@ -56,7 +56,7 @@ public class SingletonAirbender {
     private AirportListener airportListener;
     private FlightListener flightListener;
 
-    private ContentValuesHelper contentValuesHelper;
+    private final ContentValuesHelper contentValuesHelper;
 
     public static synchronized SingletonAirbender getInstance(Context context) {
         if (instance == null) {
@@ -313,7 +313,6 @@ public class SingletonAirbender {
         }
     }
     public void requestTicketsAPI(final Context context, int position) {
-        System.out.println("requestTicketsAPI");
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
             return;
@@ -361,6 +360,11 @@ public class SingletonAirbender {
             balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
     }
 
+    public void getAllAirportsDB(final Context context) {
+        if (airportListener!= null)
+            airportListener.onRefreshAirports(dbHelper.getAllAirports());
+    }
+
     public void addBalanceReq(final int amount, final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
@@ -397,6 +401,7 @@ public class SingletonAirbender {
     }
 
     public ArrayList<Airport> requestAirportsAPI(final Context context) {
+        System.out.println("requestAirportsAPI");
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
         } else {
@@ -582,64 +587,4 @@ public class SingletonAirbender {
             }
         }
     }
-
-
-    /*public void removerLivroAPI(final Livro livro, final Context context){
-        if(!LivroJsonParser.isConnectionInternet(context)){
-            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            StringRequest req = new StringRequest(Request.Method.DELETE, URL + "/" + livro.getId(), new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    removerLivroBD(livro.getId());
-                    if (detalhesListener != null)
-                        detalhesListener.onRefreshDetalhes(MenuMainActivity.DELETE);
-                }},
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-            );
-            requestQueue.add(req);
-        }
-    }
-
-    public void editarLivroAPI(final Livro livro, final Context context){
-        if(!LivroJsonParser.isConnectionInternet(context)){
-            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            StringRequest req = new StringRequest(Request.Method.PUT, URL + "/" + livro.getId(), new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    editarLivroBD(livro);
-                    if (detalhesListener != null)
-                        detalhesListener.onRefreshDetalhes(MenuMainActivity.EDIT);
-                }},
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-            ){
-                @Override
-                protected Map<String, String> getParams() {
-                    Map<String, String> params = new HashMap<>();
-                    params.put("token", TOKEN);
-                    params.put("titulo", livro.getTitulo());
-                    params.put("autor", livro.getAutor());
-                    params.put("serie", livro.getSerie());
-                    params.put("ano", livro.getAno());
-                    params.put("capa", livro.getCapa());
-
-                    return params;
-                }
-            };
-            requestQueue.add(req);
-        }
-    } */
 }
