@@ -111,7 +111,6 @@ public class ProfileFragment extends Fragment implements LoginListener {
 
     @Override
     public void onLogin(Map<String, String> map) {
-
     }
 
     @Override

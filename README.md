@@ -1,4 +1,4 @@
-# Projeto Airbender - PLSI
+# Projeto Airbender - AMSI
 
 ### Projeto realizado por 
 Grupo 16 PL2
@@ -8,20 +8,28 @@ Grupo 16 PL2
 
 ### Instalação do projeto
 
-!!IMPORTANTE!! Mudar para a branch api no projeto plsi
+!!IMPORTANTE!! Instalar a API na pasta 'sis', para no final ficar a path <servidor>/sis/airbender/
 ```
-git checkout api
+git clone https://github.com/MarcoPadeiroIPL/ProjetoSIS.git airbender
+```
+```
+composer install
 ```
 
-Ir ao ficheiro SingletonAirbender e mudar a path da api para a path correta da API nos vossos PC's
 ```
-private static final String URL = "http://" + SERVER + "/plsi/airbender/backend/web/api/";
+php init
 ```
-!!IMPORTANTE!! Caso queiram utilizar o emulador do android studio mudar de SERVER para LOCALHOST
 
-Caso queiram instalar num telemovel android precisam de estar ligados à mesma network, obter o IPV4 do vosso computador (ifconfig) que vai simular um servidor e por o IP na variavel "SERVER"
 
-Antes de testar na aplicação recomendo a irem à web no telemovel e por o IP do PC para ver se aparece as pastas do localhost
+Fazer clone do projeto numa pasta à escolha
+```
+git clone https://github.com/MarcoPadeiroIPL/ProjetoAMSI.git 
+```
+
+!!IMPORTANTE!! Antes de iniciar a aplicação, iniciar o mosquitto numa consola à parte
+```
+mosquitto
+```
 
 
 - Instituto Politécnico de Leiria 

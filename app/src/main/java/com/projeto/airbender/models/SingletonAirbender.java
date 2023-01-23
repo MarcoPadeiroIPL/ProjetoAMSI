@@ -543,7 +543,6 @@ public class SingletonAirbender {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            //Snackbar.make(((AdminActivity) context).findViewById(android.R.id.content), "Cannot checkin", Snackbar.LENGTH_SHORT).show();
                         }
                     }
             );

@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 import com.projeto.airbender.listeners.FlightListener;
 import com.projeto.airbender.models.FlightInfo;
@@ -21,7 +22,7 @@ public class FlightDetailFragment extends Fragment implements FlightListener {
     private final String airportDeparture;
     private final String airportArrival;
     private final String departureDate;
-    private TextView tvAirportDeparture, tvAirportArrival, tvDate, tvAirportDepartureCountry, tvAirportDepartureCity, tvAirportDepartureCode, tvAirportDepartureStatus, tvAirportArrivalCountry, tvAirportArrivalCity, tvAirportArrivalCode, tvAirportArrivalStatus, tvEconomicPrice, tvNormalPrice, tvLuxuryPrice, SingletonAirbende,r;
+    private TextView tvAirportDeparture, tvAirportArrival, tvDate, tvAirportDepartureCountry, tvAirportDepartureCity, tvAirportDepartureCode, tvAirportDepartureStatus, tvAirportArrivalCountry, tvAirportArrivalCity, tvAirportArrivalCode, tvAirportArrivalStatus, tvEconomicPrice, tvNormalPrice, tvLuxuryPrice;
     private FloatingActionButton fabBack;
 
     public FlightDetailFragment(String airportDeparture, String airportArrival, String departureDate) {
@@ -67,7 +68,7 @@ public class FlightDetailFragment extends Fragment implements FlightListener {
         if(flight != null) {
             loadFlight(flight);
         } else {
-            Toast.makeText(getContext(), "No flights found", Toast.LENGTH_SHORT).show();
+            Snackbar.make(getView(), "No flights found", Snackbar.LENGTH_SHORT).show();
             getActivity().onBackPressed();
         }
     }

@@ -118,6 +118,7 @@ public class SelectAirportFragment extends Fragment implements AirportListener {
     @Override
     public void onResume() {
         super.onResume();
+        SingletonAirbender.getInstance(getContext()).getAllAirportsDB(getContext());
         autoCompleteTextViewDeparture.setAdapter(adapter);
         autoCompleteTextViewArrival.setAdapter(adapter);
     }
