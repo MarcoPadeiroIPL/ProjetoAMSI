@@ -21,6 +21,7 @@ import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.models.SingletonAirbender;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity implements LoginListener {
 
@@ -75,6 +76,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedInfoUser.edit();
+        editor.putInt("ID", Integer.parseInt(Objects.requireNonNull(map.get("id"))));
         editor.putString("ROLE", map.get("role"));
         editor.putString("TOKEN", map.get("token"));
         editor.putString("USERNAME", map.get("username"));

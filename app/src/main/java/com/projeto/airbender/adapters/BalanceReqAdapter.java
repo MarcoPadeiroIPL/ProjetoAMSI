@@ -81,6 +81,8 @@ public class BalanceReqAdapter extends RecyclerView.Adapter<BalanceReqAdapter.Vi
             viewHolder.getColorBar().setBackgroundColor(Color.GREEN);
         } else if(localDataSet.get(position).getStatus().equals("Declined")){
             viewHolder.getColorBar().setBackgroundColor(Color.RED);
+        } else if(localDataSet.get(position).getStatus().equals("Ongoing")){
+            viewHolder.getColorBar().setBackgroundColor(Color.GRAY);
         }
     }
 

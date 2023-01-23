@@ -87,6 +87,7 @@ public class JsonParser {
             map.put("nif", login.getString("nif"));
             map.put("phone", login.getString("phone"));
             map.put("balance", String.valueOf(login.getDouble("balance")));
+            map.put("id", String.valueOf(login.getInt("id")));
         } catch (JSONException e) {
             e.printStackTrace();
         }

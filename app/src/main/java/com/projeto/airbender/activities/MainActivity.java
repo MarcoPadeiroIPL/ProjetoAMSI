@@ -5,11 +5,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -18,18 +15,19 @@ import com.projeto.airbender.fragments.BalanceReqFragment;
 import com.projeto.airbender.fragments.HomeFragment;
 import com.projeto.airbender.fragments.ProfileFragment;
 import com.projeto.airbender.fragments.TicketFragment;
+import com.projeto.airbender.models.SingletonAirbender;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    BottomNavigationView bottomNav;
+    private BottomNavigationView bottomNav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +37,13 @@ public class MainActivity extends AppCompatActivity {
         showSnackIfOffline();
 
 
+
         try{
-            MqttClient client = new MqttClient("tcp://10.0.2.2:1883", "9", null);
+            MqttClient client = new MqttClient("tcp://" + getServer() + ":1883", getUserID() + "", null);
+            MqttConnectOptions options = new MqttConnectOptions();
+            options.setUserName("android");
+            options.setPassword("a".toCharArray());
+            options.setCleanSession(false);
             client.setCallback(new MqttCallback() {
                 @Override
                 public void connectionLost(Throwable cause) {
@@ -51,6 +54,20 @@ public class MainActivity extends AppCompatActivity {
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
                     String messageBody = new String(message.getPayload());
                     System.out.println("Message arrived: " + messageBody);
+                    //mosquittoListener.onMessage(topic, messageBody);
+                    if(messageBody.equals("request")){
+                        SingletonAirbender.getInstance(getApplicationContext()).requestBalanceReqsAPI(getApplicationContext());
+                    }
+                    if(messageBody.equals("ticket")) {
+                        SingletonAirbender.getInstance(getApplicationContext()).requestTicketsAPI(getApplicationContext(), 0);
+                    }
+                    if(topic.equals("airport")) {
+                        //SingletonAirbender.getInstance(getApplicationContext()).requestAirportsAPI(getApplicationContext(), 1);
+                    }
+
+                    if(topic.equals("config")) {
+                        //SingletonAirbender.getInstance(getApplicationContext()).requestConfigAPI(getApplicationContext(), 1);
+                    }
                 }
 
                 @Override
@@ -58,12 +75,13 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("Delivery complete");
                 }
             });
-            client.connect();
-            client.subscribe( "9", 1);
-            client.subscribe("airports", 1);
-            client.subscribe("config", 2);
-        } catch (MqttException e) {
-            e.printStackTrace();
+
+            client.connect(options);
+            client.subscribe( getUserID() + "", 1);
+            client.subscribe("airport", 1);
+            client.subscribe("config", 1);
+        } catch (Exception ex) {
+            System.out.println("Error: " + ex.getMessage());
         }
 
         replaceFragment(new HomeFragment(), false);
@@ -89,11 +107,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public int getUserID(Context context) {
-        SharedPreferences user = context.getSharedPreferences("user_data", 0);
-        return user.getInt("ID", 0);
+    public int getUserID() {
+        SharedPreferences user = getApplicationContext().getSharedPreferences("user_data", 0);
+        int id = user.getInt("ID", 0);
+        return id;
     }
 
+    public String getServer() {
+        SharedPreferences user = getApplicationContext().getSharedPreferences("settings", 0);
+        return user.getString("SERVER", "");
+    }
     public void replaceFragment(Fragment newFragment, boolean keepBack) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -125,5 +148,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
-
 }

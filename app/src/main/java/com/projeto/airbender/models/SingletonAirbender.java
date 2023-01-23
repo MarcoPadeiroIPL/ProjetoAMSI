@@ -266,6 +266,23 @@ public class SingletonAirbender {
         }
     }
 
+    public void replaceTicketToUpcoming(Ticket ticket) {
+        ArrayList<Ticket> tickets = dbHelper.getAllTickets();
+        for (Ticket t : tickets) {
+            if (t.getId() == ticket.getId() && !Objects.equals(t.getType(), "upcoming")) {
+                dbHelper.updateDB("flights", contentValuesHelper.getTicket(ticket, "upcoming"));
+            }
+        }
+    }
+
+    public boolean ticketExists(Ticket ticket) {
+        ArrayList<Ticket> tickets = dbHelper.getAllTickets();
+        for (Ticket t : tickets) {
+            if (t.getId() == ticket.getId())
+                return true;
+        }
+        return false;
+    }
     public boolean flightExists(Flight flight) {
         ArrayList<Flight> flights = dbHelper.getAllFlights();
         for (Flight f : flights) {
@@ -322,7 +339,10 @@ public class SingletonAirbender {
                         dbHelper.insertDB("flights", contentValuesHelper.getFlight(ticket.getFlight(), path));
                     else
                         replaceFlightToUpcoming(ticket.getFlight());
-                    dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket(), path));
+                    if(!ticketExists(ticket.getTicket()))
+                        dbHelper.insertDB("tickets", contentValuesHelper.getTicket(ticket.getTicket(), path));
+                    else
+                        replaceTicketToUpcoming(ticket.getTicket());
                 }
                 if (position == UPCOMING) {
                     if (ticketUpcomingListener != null)
@@ -386,6 +406,7 @@ public class SingletonAirbender {
     }
 
     public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {
+        System.out.println("requestBalanceReqsAPI");
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
         } else {

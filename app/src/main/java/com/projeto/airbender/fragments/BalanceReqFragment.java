@@ -3,7 +3,6 @@ package com.projeto.airbender.fragments;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,7 +16,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -29,20 +27,14 @@ import java.util.Objects;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.projeto.airbender.activities.MainActivity;
 import com.projeto.airbender.adapters.BalanceReqAdapter;
 import com.projeto.airbender.listeners.BalanceReqListener;
 import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.SingletonAirbender;
 import com.projeto.airbender.utils.JsonParser;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttSecurityException;
-
-public class BalanceReqFragment extends Fragment implements BalanceReqListener {
+public class BalanceReqFragment extends Fragment implements BalanceReqListener{
     private RecyclerView recyclerView;
     private FloatingActionButton fabAddBalanceReq;
     private SwipeRefreshLayout pullToRefresh;
