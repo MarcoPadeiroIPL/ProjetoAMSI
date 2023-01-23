@@ -16,11 +16,13 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 import com.projeto.airbender.models.SingletonAirbender;
 
@@ -48,7 +50,6 @@ public class ReadQRCodeFragment extends Fragment {
                 try {
                     if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                         requestPermissions(new String[]{Manifest.permission.CAMERA}, 1);
-                        return;
                     }
                     cameraSource.start(holder);
                 } catch (IOException e) {
@@ -84,6 +85,7 @@ public class ReadQRCodeFragment extends Fragment {
                     FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     fragmentTransaction.replace(R.id.frameLayout, new MainMenuAdminFragment());
+                    Toast.makeText(getContext(), "Check-in successful!", Toast.LENGTH_SHORT).show();
                     fragmentTransaction.commit();
                 }
             }

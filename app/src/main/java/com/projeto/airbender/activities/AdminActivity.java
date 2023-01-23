@@ -19,11 +19,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.vision.CameraSource;
-import com.google.android.gms.vision.Detector;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.projeto.airbender.R;
 import com.projeto.airbender.fragments.MainMenuAdminFragment;
 import com.projeto.airbender.utils.DBHelper;

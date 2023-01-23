@@ -4,9 +4,12 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 
+import com.projeto.airbender.models.Airplane;
 import com.projeto.airbender.models.Airport;
 import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.Flight;
+import com.projeto.airbender.models.FlightInfo;
+import com.projeto.airbender.models.Tariff;
 import com.projeto.airbender.models.Ticket;
 import com.projeto.airbender.models.TicketInfo;
 
@@ -19,46 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JsonParser {
-
-    /*public static ArrayList<Livro> parserJsonLivros(JSONArray response) {
-        ArrayList<Livro> livros = new ArrayList<>();
-        try {
-            for (int i = 0; i < response.length(); i++) {
-                JSONObject livro = response.optJSONObject(i);
-                int id = livro.optInt("id");
-                String titulo = livro.optString("titulo");
-                String autor = livro.optString("autor");
-                String ano = String.valueOf(livro.optInt("ano"));
-                String serie = livro.optString("serie");
-                String capa = livro.optString("capa");
-                livros.add(new Livro(id, ano, capa, titulo, serie, autor));
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        return livros;
-    }*/
-
-    /*public static Livro parserJsonLivro(String response) {
-        Livro livroAux = null;
-        try {
-            JSONObject livro = new JSONObject(response);
-            int id = livro.optInt("id");
-            String titulo = livro.optString("titulo");
-            String autor = livro.optString("autor");
-            String ano = String.valueOf(livro.optInt("ano"));
-            String serie = livro.optString("serie");
-            String capa = livro.optString("capa");
-            livroAux = new Livro(id, ano, capa, titulo, serie, autor);
-
-        }
-        catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return livroAux;
-    }*/
-
     public static Map<String, String> parseJsonUpdateUserData(String response) {
         Map<String, String> map = new HashMap<String, String>();
         try {
@@ -74,11 +37,11 @@ public class JsonParser {
         }
         return map;
     }
+
     public static Map<String, String> parserJsonLogin(String response) {
         Map<String, String> map = new HashMap<String, String>();
         try {
             JSONObject login = new JSONObject(response);
-            System.out.println(login);
             map.put("token", login.getString("token"));
             map.put("role", login.getString("role"));
             map.put("username", login.getString("username"));
@@ -122,7 +85,7 @@ public class JsonParser {
             ticket = new Ticket(json.optInt("id"), json.optString("fName"), json.optString("surname"),
                     json.optString("gender"), json.optInt("age"), json.optInt("checkedIn"), json.optInt("client_id"),
                     json.optInt("flight_id"), json.optString("seatLinha"), json.optInt("seatCol"), json.optInt("luggage_1"),
-                    json.optInt("luggage_2"), json.optInt("receipt_id"), json.optInt("tariff_id"), json.optString("tariffType"),"a");
+                    json.optInt("luggage_2"), json.optInt("receipt_id"), json.optInt("tariff_id"), json.optString("tariffType"), "a");
 
             JSONObject jsonFlight = json.getJSONObject("flight");
             flight = new Flight(jsonFlight.optInt("id"), jsonFlight.optString("departureDate"), json.optString("duration"),
@@ -202,4 +165,48 @@ public class JsonParser {
         return ni != null && cm.getNetworkInfo(ni).isConnected();
     }
 
+    public static ArrayList<Airport> parseAirports(JSONArray response) {
+        ArrayList<Airport> airports = new ArrayList<Airport>();
+        try {
+            for (int i = 0; i < response.length(); i++) {
+                JSONObject airport = response.optJSONObject(i);
+                int id = airport.optInt("id");
+                String country = airport.optString("country");
+                String city = airport.optString("city");
+                String code = airport.optString("code");
+                int search = airport.optInt("search");
+                String status = airport.optString("status");
+                airports.add(new Airport(id, country, code, city, search, status, "a"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return airports;
+    }
+
+    public static FlightInfo parseFlight(String response) {
+        Flight flight = null;
+        Airplane airplane = null;
+        Tariff tariff = null;
+        FlightInfo flightInfo = null;
+        try {
+            JSONObject json = new JSONObject(response);
+            flight = new Flight(json.optInt("id"), json.optString("departureDate"), json.optString("duration"),
+                    json.optInt("airplane_id"), json.optInt("airportDeparture_id"), json.optInt("airportArrival_id"), json.optString("status"), "a");
+            JSONObject jsonAirplane = json.getJSONObject("airplane");
+            airplane = new Airplane(jsonAirplane.optInt("id"), jsonAirplane.optInt("luggageCapacity"), jsonAirplane.optInt("minLinha"),
+                    jsonAirplane.optString("minCol"), jsonAirplane.optInt("maxLinha"), jsonAirplane.optString("maxCol"), jsonAirplane.optString("economicStart"), jsonAirplane.optString("economicStop"), jsonAirplane.optString("normalStart"), jsonAirplane.optString("normalStop"), jsonAirplane.optString("luxuryStart"), jsonAirplane.optString("luxuryStop"), jsonAirplane.optString("status"));
+            JSONArray temp = json.getJSONArray("tariff");
+            JSONObject jsonTariff = temp.getJSONObject(0);
+            for (int i = 0; i < temp.length(); i++) {
+                if (temp.getJSONObject(i).getInt("active") == 1)
+                     jsonTariff = temp.getJSONObject(i);
+            }
+            tariff = new Tariff(jsonTariff.optInt("id"), jsonTariff.getString("startDate"), jsonTariff.optDouble("economicPrice"), jsonTariff.optDouble("normalPrice"), jsonTariff.optDouble("luxuryPrice"), jsonTariff.optInt("flight_id"), jsonTariff.optBoolean("active"));
+            flightInfo = new FlightInfo(flight, tariff, airplane);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return flightInfo;
+    }
 }

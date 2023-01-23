@@ -9,13 +9,18 @@ public class Tariff {
     private int flight_id;
     private boolean active;
 
-    public Tariff(String startDate, double economicPrice, double normalPrice, double luxuryPrice, int flight_id, boolean active) {
+    public Tariff(int id, String startDate, double economicPrice, double normalPrice, double luxuryPrice, int flight_id, boolean active) {
+        this.id = id;
         this.startDate = startDate;
         this.economicPrice = economicPrice;
         this.normalPrice = normalPrice;
         this.luxuryPrice = luxuryPrice;
         this.flight_id = flight_id;
         this.active = active;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getId() {

@@ -74,8 +74,10 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     public void onLogin(Map<String, String> map) {
         // save on shared prefenrences
         SharedPreferences sharedInfoUser = getSharedPreferences("user_data", MODE_PRIVATE);
+        SharedPreferences settings = getSharedPreferences("settings", MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedInfoUser.edit();
+        settings.edit().putBoolean("FIRSTLOGIN", true).apply();
         editor.putInt("ID", Integer.parseInt(map.get("id")));
         editor.putString("ROLE", map.get("role"));
         editor.putString("TOKEN", map.get("token"));

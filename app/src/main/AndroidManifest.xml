@@ -25,7 +25,8 @@
         </activity>
         <activity
             android:name=".activities.FlightActivity"
-            android:exported="false">
+            android:exported="false"
+            android:theme="@style/Theme.Airbender.NoActionBar">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

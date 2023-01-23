@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 import com.projeto.airbender.activities.FlightActivity;
 import com.projeto.airbender.activities.LoginActivity;
@@ -44,7 +45,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (!JsonParser.isConnectionInternet(getContext())) {
-                    Toast.makeText(getContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(view, "No internet connection", Snackbar.LENGTH_LONG).show();
                 } else {
                     Intent intent = new Intent(getContext(), FlightActivity.class);
                     startActivity(intent);

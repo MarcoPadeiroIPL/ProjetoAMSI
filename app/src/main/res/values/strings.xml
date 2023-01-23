@@ -37,4 +37,9 @@
     <string name="txt_surname">Surname</string>
     <string name="txt_phone">Phone</string>
     <string name="txt_nif">NIF</string>
+    <string name="airport_departure">Airport departure</string>
+    <string name="airport_arrival">Airport arrival</string>
+    <string name="date">Departure Date</string>
+    <string name="txt_search">Search</string>
+    <string name="txt_select">Select</string>
 </resources>

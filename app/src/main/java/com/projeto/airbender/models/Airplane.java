@@ -4,21 +4,24 @@ public class Airplane {
     private int id;
     private int luggageCappacity;
     private int minLinha;
-    private char minCol;
+    private String minCol;
     private int maxLinha;
-    private char maxCol;
-    private char economicStart;
-    private char economicStop;
-    private char normalStart;
-    private char normalStop;
-    private char luxuryStart;
-    private char luxuryStop;
+    private String maxCol;
+    private String economicStart;
+    private String economicStop;
+    private String normalStart;
+    private String normalStop;
+    private String luxuryStart;
+    private String luxuryStop;
     private String status;
 
     public int getId() {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
     public int getLuggageCappacity() {
         return luggageCappacity;
     }
@@ -35,11 +38,11 @@ public class Airplane {
         this.minLinha = minLinha;
     }
 
-    public char getMinCol() {
+    public String getMinCol() {
         return minCol;
     }
 
-    public void setMinCol(char minCol) {
+    public void setMinCol(String minCol) {
         this.minCol = minCol;
     }
 
@@ -51,59 +54,59 @@ public class Airplane {
         this.maxLinha = maxLinha;
     }
 
-    public char getMaxCol() {
+    public String getMaxCol() {
         return maxCol;
     }
 
-    public void setMaxCol(char maxCol) {
+    public void setMaxCol(String maxCol) {
         this.maxCol = maxCol;
     }
 
-    public char getEconomicStart() {
+    public String getEconomicStart() {
         return economicStart;
     }
 
-    public void setEconomicStart(char economicStart) {
+    public void setEconomicStart(String economicStart) {
         this.economicStart = economicStart;
     }
 
-    public char getEconomicStop() {
+    public String getEconomicStop() {
         return economicStop;
     }
 
-    public void setEconomicStop(char economicStop) {
+    public void setEconomicStop(String economicStop) {
         this.economicStop = economicStop;
     }
 
-    public char getNormalStart() {
+    public String getNormalStart() {
         return normalStart;
     }
 
-    public void setNormalStart(char normalStart) {
+    public void setNormalStart(String normalStart) {
         this.normalStart = normalStart;
     }
 
-    public char getNormalStop() {
+    public String getNormalStop() {
         return normalStop;
     }
 
-    public void setNormalStop(char normalStop) {
+    public void setNormalStop(String normalStop) {
         this.normalStop = normalStop;
     }
 
-    public char getLuxuryStart() {
+    public String getLuxuryStart() {
         return luxuryStart;
     }
 
-    public void setLuxuryStart(char luxuryStart) {
+    public void setLuxuryStart(String luxuryStart) {
         this.luxuryStart = luxuryStart;
     }
 
-    public char getLuxuryStop() {
+    public String getLuxuryStop() {
         return luxuryStop;
     }
 
-    public void setLuxuryStop(char luxuryStop) {
+    public void setLuxuryStop(String luxuryStop) {
         this.luxuryStop = luxuryStop;
     }
 
@@ -114,7 +117,8 @@ public class Airplane {
     public void setStatus(String status) {
         this.status = status;
     }
-    public Airplane(int luggageCappacity, int minLinha, char minCol, int maxLinha, char maxCol, char economicStart, char economicStop, char normalStart, char normalStop, char luxuryStart, char luxuryStop, String status) {
+    public Airplane(int id, int luggageCappacity, int minLinha, String minCol, int maxLinha, String maxCol, String economicStart, String economicStop, String normalStart, String normalStop, String luxuryStart, String luxuryStop, String status) {
+        this.id = id;
         this.luggageCappacity = luggageCappacity;
         this.minLinha = minLinha;
         this.minCol = minCol;

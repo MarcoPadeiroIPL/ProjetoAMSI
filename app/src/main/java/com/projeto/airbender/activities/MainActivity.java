@@ -12,6 +12,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.R;
 import com.projeto.airbender.fragments.BalanceReqFragment;
+import com.projeto.airbender.fragments.GenerateQRCodeFragment;
 import com.projeto.airbender.fragments.HomeFragment;
 import com.projeto.airbender.fragments.ProfileFragment;
 import com.projeto.airbender.fragments.TicketFragment;
@@ -36,6 +37,13 @@ public class MainActivity extends AppCompatActivity {
 
         showSnackIfOffline();
 
+        SharedPreferences settings = getApplicationContext().getSharedPreferences("settings", 0);
+        if(settings.getBoolean("FIRSTLOGIN", true)) {
+            System.out.println("FIRST LOGIN");
+            SingletonAirbender.getInstance(getApplicationContext()).requestTicketsAPI(getApplicationContext(), 0);
+            SingletonAirbender.getInstance(getApplicationContext()).requestBalanceReqsAPI(getApplicationContext());
+            settings.edit().putBoolean("FIRSTLOGIN", false).apply();
+        }
 
 
         try{
@@ -59,7 +67,10 @@ public class MainActivity extends AppCompatActivity {
                         SingletonAirbender.getInstance(getApplicationContext()).requestBalanceReqsAPI(getApplicationContext());
                     }
                     if(messageBody.equals("ticket")) {
+                        replaceFragment(new TicketFragment(), false);
                         SingletonAirbender.getInstance(getApplicationContext()).requestTicketsAPI(getApplicationContext(), 0);
+                        SingletonAirbender.getInstance(getApplicationContext()).requestTicketsAPI(getApplicationContext(), 1);
+                        SingletonAirbender.getInstance(getApplicationContext()).requestTicketsAPI(getApplicationContext(), 2);
                     }
                     if(topic.equals("airport")) {
                         //SingletonAirbender.getInstance(getApplicationContext()).requestAirportsAPI(getApplicationContext(), 1);
@@ -120,6 +131,12 @@ public class MainActivity extends AppCompatActivity {
     public void replaceFragment(Fragment newFragment, boolean keepBack) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.setCustomAnimations(
+                R.anim.slide_in,  // enter
+                R.anim.fade_out,  // exit
+                R.anim.fade_in,   // popEnter
+                R.anim.slide_out  // popExit
+        );
         fragmentTransaction.replace(R.id.frameLayout, newFragment);
 
         if (keepBack)

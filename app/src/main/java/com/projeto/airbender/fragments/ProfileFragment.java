@@ -19,6 +19,7 @@ import com.projeto.airbender.R;
 import com.projeto.airbender.activities.LoginActivity;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.models.SingletonAirbender;
+import com.projeto.airbender.utils.DBHelper;
 
 import java.util.Map;
 
@@ -55,6 +56,11 @@ public class ProfileFragment extends Fragment implements LoginListener {
                 editor.clear();
                 editor.apply();
 
+                DBHelper dbHelper = new DBHelper(getContext());
+                dbHelper.deleteAllDB("tickets");
+                dbHelper.deleteAllDB("balanceReq");
+                dbHelper.deleteAllDB("airports");
+                dbHelper.deleteAllDB("flights");
                 Intent intent = new Intent(getContext(), LoginActivity.class);
                 startActivity(intent);
                 getActivity().finish();

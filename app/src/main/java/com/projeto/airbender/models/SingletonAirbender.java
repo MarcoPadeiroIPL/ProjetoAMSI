@@ -17,7 +17,10 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.snackbar.Snackbar;
 import com.projeto.airbender.activities.AdminActivity;
+import com.projeto.airbender.fragments.SelectAirportFragment;
+import com.projeto.airbender.listeners.AirportListener;
 import com.projeto.airbender.listeners.BalanceReqListener;
+import com.projeto.airbender.listeners.FlightListener;
 import com.projeto.airbender.listeners.LoginListener;
 import com.projeto.airbender.listeners.TicketListener;
 import com.projeto.airbender.utils.ContentValuesHelper;
@@ -40,6 +43,8 @@ public class SingletonAirbender {
 
     private ArrayList<BalanceReq> balanceReqs;
     private ArrayList<TicketInfo> tickets;
+    private ArrayList<Airport> airports;
+    private Flight flight;
 
     private static final String PATH = "/sis/airbender/backend/web/api/";
 
@@ -48,6 +53,8 @@ public class SingletonAirbender {
     private TicketListener ticketUpcomingListener;
     private TicketListener ticketPendingListener;
     private TicketListener ticketPastListener;
+    private AirportListener airportListener;
+    private FlightListener flightListener;
 
     private ContentValuesHelper contentValuesHelper;
 
@@ -104,6 +111,14 @@ public class SingletonAirbender {
 
     public void setTicketPastListener(TicketListener ticketListener) {
         this.ticketPastListener = ticketListener;
+    }
+
+    public void setAirportListener(AirportListener airportListener) {
+        this.airportListener = airportListener;
+    }
+
+    public void setFlightListener(FlightListener flightListener) {
+        this.flightListener = flightListener;
     }
 
     public void getUserData(final Context context) {
@@ -200,19 +215,6 @@ public class SingletonAirbender {
         }
         return null;
     }
-
-    /*public void removerLivroBD(int id) {
-        Livro livroaux = getLivro(id);
-        if (livroaux != null)
-            livroBD.removerLivroBD(id);
-    }
-
-    public void editarLivroBD(Livro livro) {
-        Livro livroaux = getLivro(livro.getId());
-        if (livroaux != null)
-            livroBD.editarLivroDB(livro);
-    }*/
-
 
     private Flight findFlight(ArrayList<Flight> flights, int flight_id) {
         for (Flight flight : flights)
@@ -342,9 +344,6 @@ public class SingletonAirbender {
                     else
                         replaceTicketToType(ticket.getTicket(), path);
                 }
-                dbHelper.printTableData("tickets");
-                dbHelper.printTableData("flights");
-                dbHelper.printTableData("airports");
                 getTicketsFromDB(position);
             }
         },
@@ -397,10 +396,78 @@ public class SingletonAirbender {
         }
     }
 
-    public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {
-        System.out.println("requestBalanceReqsAPI");
+    public ArrayList<Airport> requestAirportsAPI(final Context context) {
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
+        } else {
+            JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "airports", getToken(context)), null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+                    airports = JsonParser.parseAirports(response);
+                    dbHelper.deleteDB("airports", "type", "buy");
+                    for (Airport airport : airports) {
+                        if(!airportExists(airport))
+                            dbHelper.insertDB("airports", contentValuesHelper.getAirport(airport, "buy"));
+                    }
+                    if (airportListener != null)
+                        airportListener.onRefreshAirports(dbHelper.getAllAirports());
+                }
+            },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(context, error.getMessage() + "", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+            requestQueue.add(req);
+        }
+        return airports;
+    }
+
+    public Flight requestFlightAPI(final Context context, final String airportDeparture, final String airportArrival, final String departureDate) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
+        } else {
+            String mpath ="flights/" + dbHelper.getAirports("city", airportDeparture).get(0).getId()  + "/" + dbHelper.getAirports("city", airportArrival).get(0).getId() + "/" + departureDate;
+            StringRequest req = new StringRequest(Request.Method.GET, makeURL(getServer(context), mpath, getToken(context)), new Response.Listener<String>() {
+                // Sucesso
+                @Override
+                public void onResponse(String response) {
+                    FlightInfo flightInfo = JsonParser.parseFlight(response);
+                    if (airportListener != null)
+                        flightListener.onRefreshFlight(flightInfo);
+                }
+            },
+                    // erro
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            try {
+                                if (error.networkResponse.statusCode == 500) {
+                                    Toast.makeText(context, "Server error", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                if (error.networkResponse.statusCode == 403) {
+                                    Toast.makeText(context, "Wrong credentials", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                Toast.makeText(context, error.getMessage(), Toast.LENGTH_SHORT).show();
+                            } catch (Exception ex) {
+                                Toast.makeText(context, "Server not found", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+            );
+            requestQueue.add(req);
+        }
+        return flight;
+    }
+    public ArrayList<BalanceReq> requestBalanceReqsAPI(final Context context) {
+        if (!JsonParser.isConnectionInternet(context)) {
+            Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Could not update to most recent information", Snackbar.LENGTH_SHORT).show();
+            if (balanceReqListener != null)
+                balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
         } else {
             JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, makeURL(getServer(context), "balance-req", getToken(context)), null, new Response.Listener<JSONArray>() {
                 @Override
@@ -426,34 +493,34 @@ public class SingletonAirbender {
         return balanceReqs;
     }
 
-    public boolean deleteBalanceReq(Context context, BalanceReq balanceReq) {
-        final boolean[] success = {false};
+    public void deleteBalanceReq(Context context, BalanceReq balanceReq) {
         if (!JsonParser.isConnectionInternet(context)) {
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), "No internet connection", Snackbar.LENGTH_SHORT).show();
+            if (balanceReqListener != null)
+                balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
         } else {
             StringRequest req = new StringRequest(Request.Method.DELETE, makeURL(getServer(context), "balance-req/" + balanceReq.getId(), getToken(context)), new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     dbHelper.deleteID("balanceReq", balanceReq.getId());
+                    Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Deleted Sucessfully", Snackbar.LENGTH_SHORT).show();
                     if (balanceReqListener != null)
                         balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
-                    Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Deleted successfully!", Snackbar.LENGTH_SHORT).show();
-                    success[0] = true;
                 }
             },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             if (error.networkResponse.statusCode == 403) {
+                                if (balanceReqListener != null)
+                                    balanceReqListener.onRefreshBalanceReqList(dbHelper.getBalanceReq());
                                 Snackbar.make(((Activity) context).findViewById(android.R.id.content), "Cannot delete decided balance requests", Snackbar.LENGTH_SHORT).show();
                             }
-                            success[0] = false;
                         }
                     }
             );
             requestQueue.add(req);
         }
-        return success[0];
     }
 
     public void checkIn(Context context, String ticket) {
@@ -515,6 +582,7 @@ public class SingletonAirbender {
             }
         }
     }
+
 
     /*public void removerLivroAPI(final Livro livro, final Context context){
         if(!LivroJsonParser.isConnectionInternet(context)){

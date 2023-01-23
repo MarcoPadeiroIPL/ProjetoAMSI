@@ -34,7 +34,7 @@ import com.projeto.airbender.models.BalanceReq;
 import com.projeto.airbender.models.SingletonAirbender;
 import com.projeto.airbender.utils.JsonParser;
 
-public class BalanceReqFragment extends Fragment implements BalanceReqListener{
+public class BalanceReqFragment extends Fragment implements BalanceReqListener {
     private RecyclerView recyclerView;
     private FloatingActionButton fabAddBalanceReq;
     private SwipeRefreshLayout pullToRefresh;
@@ -71,28 +71,24 @@ public class BalanceReqFragment extends Fragment implements BalanceReqListener{
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                if (!Objects.equals(balanceReqAdapter.getBalanceReq(viewHolder.getAdapterPosition()).getStatus(), "Ongoing")) {
-                    Snackbar.make(view, "You can't delete a balance request that is not ongoing", Snackbar.LENGTH_LONG).show();
-                } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle("Are you sure?");
-                    builder.setMessage("This action cannot be undone.");
-                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // Perform the action
-                            if (SingletonAirbender.getInstance(getContext()).deleteBalanceReq(getContext(), balanceReqAdapter.getBalanceReq(viewHolder.getAdapterPosition())))
-                                Snackbar.make(view, "Deleted successfully", Snackbar.LENGTH_LONG).show();
-                        }
-                    });
-                    builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.show();
-                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Are you sure?");
+                builder.setMessage("This action cannot be undone.");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Perform the action
+                        SingletonAirbender.getInstance(getContext()).deleteBalanceReq(getContext(), balanceReqAdapter.getBalanceReq(viewHolder.getAdapterPosition()));
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SingletonAirbender.getInstance(getContext()).getAllBalanceReqsDB(getContext());
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
